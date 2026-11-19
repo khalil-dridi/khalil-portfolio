@@ -24,7 +24,7 @@ describe('Login', () => {
       ],
     }).compileComponents();
     router = TestBed.inject(Router);
-    spyOn(router, 'navigate').and.resolveTo(true);
+    spyOn(router, 'navigateByUrl').and.resolveTo(true);
     fixture = TestBed.createComponent(Login);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -58,11 +58,16 @@ describe('Login', () => {
   });
 
   it('redirects to the admin dashboard after successful authentication', () => {
-    auth.login.and.returnValue(of({ accessToken: 'memory-token', tokenType: 'Bearer', expiresIn: 60, admin: {} }));
+    auth.login.and.returnValue(of({
+      accessToken: 'memory-token',
+      tokenType: 'Bearer',
+      expiresIn: 60,
+      admin: { id: 1, email: 'admin@example.com', lastLoginAt: null },
+    }));
     component.form.setValue({ email: 'admin@example.com', password: 'secret' });
     component.submit();
     expect(auth.login).toHaveBeenCalledWith({ email: 'admin@example.com', password: 'secret' });
-    expect(router.navigate).toHaveBeenCalledWith(['/admin']);
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/admin', { replaceUrl: true });
   });
 
   it('reports invalid credentials and network failures in French', () => {

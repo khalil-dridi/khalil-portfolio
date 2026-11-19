@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ThemeAccent, ThemeService } from '../../../core/theme/theme.service';
@@ -24,7 +24,12 @@ export class Login {
     { id: 'green', label: 'Vert' }, { id: 'blue', label: 'Bleu' }, { id: 'pink', label: 'Rose' },
   ];
 
-  constructor(readonly theme: ThemeService, private readonly auth: AuthService, private readonly router: Router) {}
+  constructor(
+    readonly theme: ThemeService,
+    private readonly auth: AuthService,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute,
+  ) {}
 
   togglePasswordVisibility(): void {
     this.passwordVisible.update((visible) => !visible);
@@ -38,7 +43,11 @@ export class Login {
     this.errorMessage.set('');
     this.loading.set(true);
     this.auth.login(this.form.getRawValue()).pipe(finalize(() => this.loading.set(false))).subscribe({
-      next: () => void this.router.navigate(['/admin']),
+      next: () => {
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+        const target = returnUrl === '/admin' || returnUrl?.startsWith('/admin/') ? returnUrl : '/admin';
+        void this.router.navigateByUrl(target, { replaceUrl: true });
+      },
       error: (error: unknown) => this.errorMessage.set(AuthService.messageFor(error)),
     });
   }

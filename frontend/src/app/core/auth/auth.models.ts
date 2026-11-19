@@ -4,10 +4,9 @@ export interface LoginRequest {
 }
 
 export interface AdminUser {
-  id?: number | string;
-  email?: string;
-  name?: string;
-  [key: string]: unknown;
+  id: number;
+  email: string;
+  lastLoginAt: string | null;
 }
 
 export interface LoginResponse {
@@ -18,7 +17,5 @@ export interface LoginResponse {
 }
 
 export interface CsrfResponse {
-  token?: string;
-  csrfToken?: string;
-  headerName?: string;
+  token: string;
 }
