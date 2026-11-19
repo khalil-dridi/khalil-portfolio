@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from '../../core/guards/auth.guard';
 
 export const ADMIN_ROUTES: Routes = [
   {
@@ -8,6 +9,7 @@ export const ADMIN_ROUTES: Routes = [
   {
     path: '',
     loadComponent: () => import('../../layouts/admin-layout/admin-layout').then((module) => module.AdminLayout),
+    canActivate: [authGuard],
     children: [
       { path: '', pathMatch: 'full', loadComponent: () => import('./dashboard/dashboard').then((module) => module.Dashboard) },
       { path: 'profile', loadComponent: () => import('./profile/profile').then((module) => module.Profile) },
