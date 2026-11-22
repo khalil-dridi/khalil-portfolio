@@ -65,7 +65,7 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
 
       - name: Authenticate with SonarQube
-        uses: SonarSource/sonarqube-auth-action@v1.2
+        uses: SonarSource/sonarqube-auth-action@b372e2c2930aadfcc4f4399446da1e12772709ad # v1.2
         id: auth
 
       - name: SonarQube Scan
