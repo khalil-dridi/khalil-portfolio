@@ -23,6 +23,7 @@ import java.util.Base64;
 
 @Configuration
 public class JwtConfig {
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     @Bean
     SecretKey jwtSecretKey(
             @Value("${app.security.jwt.secret:}") String secret,
@@ -37,7 +38,7 @@ public class JwtConfig {
                 throw new IllegalStateException("JWT_SECRET must be configured outside dev and test profiles");
             }
             keyBytes = new byte[32];
-            new SecureRandom().nextBytes(keyBytes);
+            SECURE_RANDOM.nextBytes(keyBytes);
         }
 
         if (keyBytes == null) {
