@@ -24,3 +24,10 @@ jobs:
       - name: Build frontend
         run: npm run build
         working-directory: frontend
+  backend:
+    name: Backend CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
