@@ -2,6 +2,7 @@ package com.khalildridi.project.storage;
 
 import com.khalildridi.project.exception.InvalidProjectMediaException;
 import com.khalildridi.project.exception.ProjectMediaTooLargeException;
+import com.khalildridi.project.exception.ProjectMediaStorageException;
 import com.khalildridi.project.exception.UnsupportedProjectMediaFormatException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -14,6 +15,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.io.FileNotFoundException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -79,6 +81,64 @@ class LocalProjectMediaStorageServiceTest {
         byte[] webm = new byte[]{0x1a,0x45,(byte)0xdf,(byte)0xa3, 0x42,(byte)0x82,(byte)0x84,'w','e','b','m'};
         assertEquals("video/webm", storage.storeVideo(new MockMultipartFile(
                 "file", "not-a-video.bin", "text/plain", webm)).contentType());
+    }
+
+    @Test
+    void rejectsNullAndMalformedImagePayloadsAndCleansTemporaryFiles() throws Exception {
+        LocalProjectMediaStorageService storage = storage(4096, 4096);
+        assertThrows(InvalidProjectMediaException.class, () -> storage.storeImage(null));
+        assertThrows(InvalidProjectMediaException.class, () -> storage.storeVideo(
+                new MockMultipartFile("file", "empty", "video/mp4", new byte[0])));
+        assertThrows(InvalidProjectMediaException.class, () -> storage.storeImage(new MockMultipartFile(
+                "file", "spoof.jpg", "image/jpeg", new byte[]{(byte) 0xff, (byte) 0xd8, (byte) 0xff, 1})));
+        assertThrows(InvalidProjectMediaException.class, () -> storage.storeImage(new MockMultipartFile(
+                "file", "spoof.jpg", "image/jpeg", new byte[]{(byte) 0xff, (byte) 0xd8, (byte) 0x89, 'R'})));
+        assertTrue(Files.notExists(temp.resolve("images")) || Files.list(temp.resolve("images")).findAny().isEmpty());
+    }
+
+    @Test
+    void validatesVideoContainerAndHandlesReadDeleteAndTraversalSafely() throws Exception {
+        LocalProjectMediaStorageService storage = storage(4096, 4096);
+        byte[] badMp4 = ByteBuffer.allocate(16).order(ByteOrder.BIG_ENDIAN)
+                .putInt(16).put("ftyp".getBytes()).put("isom".getBytes()).array();
+        assertThrows(InvalidProjectMediaException.class, () -> storage.storeVideo(new MockMultipartFile(
+                "file", "broken.mp4", "video/mp4", badMp4)));
+        assertThrows(InvalidProjectMediaException.class, () -> storage.readImage("../outside.png"));
+        assertThrows(InvalidProjectMediaException.class, () -> storage.readVideo("../outside.mp4"));
+        assertThrows(InvalidProjectMediaException.class, () -> storage.readImage("not-a-key.png"));
+        assertThrows(FileNotFoundException.class, () -> storage.readImage("00000000-0000-0000-0000-000000000000.png"));
+        storage.deleteImage("00000000-0000-0000-0000-000000000000.png");
+        storage.deleteImage(null);
+        assertThrows(InvalidProjectMediaException.class, () -> storage.deleteVideo("../../important.mp4"));
+    }
+
+    @Test
+    void storageRootThatIsAFileIsReportedAsStorageFailure() throws Exception {
+        Path fileRoot = temp.resolve("not-a-directory");
+        Files.writeString(fileRoot, "file");
+        LocalProjectMediaStorageService storage = new LocalProjectMediaStorageService(fileRoot, temp.resolve("videos"), 4096, 4096);
+        assertThrows(ProjectMediaStorageException.class, () -> storage.storeImage(new MockMultipartFile(
+                "file", "valid.png", "image/png", png())));
+    }
+
+    @Test
+    void readsAndDeletesVideoAndRejectsMalformedWebpChunks() throws Exception {
+        LocalProjectMediaStorageService storage = storage(4096, 4096);
+        byte[] webm = new byte[]{0x1a,0x45,(byte)0xdf,(byte)0xa3, 0x42,(byte)0x82,(byte)0x84,'w','e','b','m'};
+        StoredProjectMedia stored = storage.storeVideo(new MockMultipartFile("file", "clip.webm", "", webm));
+        assertArrayEquals(webm, storage.readVideo(stored.key()).getContentAsByteArray());
+        storage.deleteVideo(stored.key());
+        storage.deleteVideo(stored.key());
+        assertFalse(Files.exists(temp.resolve("videos").resolve(stored.key())));
+
+        byte[] unknownChunk = new byte[]{'R','I','F','F', 17,0,0,0, 'W','E','B','P',
+                'N','O','P','E', 5,0,0,0, 0,0,0,0,0};
+        assertThrows(UnsupportedProjectMediaFormatException.class, () -> storage.storeImage(
+                new MockMultipartFile("file", "fake.webp", "image/webp", unknownChunk)));
+        byte[] inconsistentRiff = new byte[]{'R','I','F','F', 99,0,0,0, 'W','E','B','P',
+                'V','P','8','L', 5,0,0,0, 0,0,0,0,0};
+        assertThrows(UnsupportedProjectMediaFormatException.class, () -> storage.storeImage(
+                new MockMultipartFile("file", "fake.webp", "image/webp", inconsistentRiff)));
     }
 
     private LocalProjectMediaStorageService storage(long imageMax, long videoMax) {

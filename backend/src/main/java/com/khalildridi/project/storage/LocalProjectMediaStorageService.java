@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
+import javax.imageio.IIOException;
 import javax.imageio.stream.ImageInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -154,6 +155,8 @@ public class LocalProjectMediaStorageService implements ProjectMediaStorageServi
                 int height = reader.getHeight(0);
                 return width > 0 && height > 0 && (long) width * height <= MAX_IMAGE_PIXELS
                         && reader.read(0) != null;
+            } catch (IIOException e) {
+                return false;
             } finally {
                 reader.dispose();
             }
