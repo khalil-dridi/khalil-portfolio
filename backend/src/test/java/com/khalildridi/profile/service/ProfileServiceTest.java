@@ -151,16 +151,20 @@ void imageContentShouldDetectDifferentValues() {
     assertThat(content).isNotEqualTo(differentType);
 }
 
-@Test
-void imageContentEqualsShouldHandleIdentityNullAndDifferentTypes() {
-    var content = new ProfileService.ImageContent(
-            new byte[]{1, 2, 3}, "image/png"
-    );
+    @Test
+    void imageContentEqualsShouldHandleIdentityNullAndDifferentTypes() {
+        var content = new ProfileService.ImageContent(
+                new byte[]{1, 2, 3}, "image/png"
+        );
 
-    assertThat(content.equals(content)).isTrue();
-    assertThat(content.equals(null)).isFalse();
-    assertThat(content.equals("not an ImageContent")).isFalse();
-}
+        Object sameReference = content;
+        Object nullReference = null;
+        Object differentType = "not an ImageContent";
+
+        assertThat(content).isEqualTo(sameReference);
+        assertThat(content).isNotEqualTo(nullReference);
+        assertThat(content).isNotEqualTo(differentType);
+    }
 
 @Test
 void imageContentShouldProtectItsInternalByteArray() {
