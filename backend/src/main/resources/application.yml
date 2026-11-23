@@ -7,8 +7,8 @@ spring:
     name: portfolio-backend
   servlet:
     multipart:
-      max-file-size: ${PROFILE_IMAGE_MAX_SIZE:5MB}
-      max-request-size: ${PROFILE_IMAGE_MAX_SIZE:5MB}
+      max-file-size: ${MULTIPART_MAX_FILE_SIZE:110MB}
+      max-request-size: ${MULTIPART_MAX_REQUEST_SIZE:115MB}
 
   profiles:
     default: dev
@@ -44,6 +44,13 @@ management:
 app:
   profile:
     image-storage-dir: ${PROFILE_IMAGE_STORAGE_DIR:./var/profile-images}
+  project:
+    storage:
+      image-dir: ${PROJECT_IMAGE_STORAGE_DIR:./var/project-media/images}
+      video-dir: ${PROJECT_VIDEO_STORAGE_DIR:./var/project-media/videos}
+    media:
+      image-max-size: ${PROJECT_IMAGE_MAX_SIZE:5242880}
+      video-max-size: ${PROJECT_VIDEO_MAX_SIZE:104857600}
   security:
     refresh-token-expiration: 7d
     access-token-expiration: 15m

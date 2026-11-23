@@ -21,6 +21,13 @@ spring:
 app:
   profile:
     image-storage-dir: ${java.io.tmpdir}/portfolio-profile-images
+  project:
+    storage:
+      image-dir: ${java.io.tmpdir}/portfolio-project-images-test
+      video-dir: ${java.io.tmpdir}/portfolio-project-videos-test
+    media:
+      image-max-size: 5242880
+      video-max-size: 104857600
   security:
     jwt:
       secret: ${JWT_SECRET:}
