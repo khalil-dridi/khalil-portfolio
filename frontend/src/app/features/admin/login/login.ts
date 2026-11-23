@@ -3,11 +3,11 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
-import { ThemeAccent, ThemeService } from '../../../core/theme/theme.service';
+import { ThemeControls } from '../../../shared/components/theme-controls/theme-controls';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, ThemeControls],
   templateUrl: './login.html',
 })
 export class Login {
@@ -19,13 +19,7 @@ export class Login {
   readonly passwordVisible = signal(false);
   readonly loading = signal(false);
   readonly errorMessage = signal('');
-  readonly accents: { id: ThemeAccent; label: string }[] = [
-    { id: 'red', label: 'Rouge' }, { id: 'orange', label: 'Orange' },
-    { id: 'green', label: 'Vert' }, { id: 'blue', label: 'Bleu' }, { id: 'pink', label: 'Rose' },
-  ];
-
   constructor(
-    readonly theme: ThemeService,
     private readonly auth: AuthService,
     private readonly router: Router,
     private readonly route: ActivatedRoute,

@@ -1,1 +1,56 @@
-<h1>About</h1>
+<section class="about-page" aria-labelledby="about-title">
+  @if (loading()) {
+    <div class="about-state" role="status"><span class="about-spinner" aria-hidden="true"></span>Chargement du profil…</div>
+  } @else if (errorMessage()) {
+    <div class="about-state about-error-state" role="alert"><p>{{ errorMessage() }}</p><button class="about-button about-button-secondary" type="button" (click)="loadProfile()">Réessayer</button></div>
+  } @else if (profile(); as profile) {
+    <header class="about-heading">
+      <p class="about-eyebrow"><span></span> À propos</p>
+      <h1 id="about-title">Mon <span>profil</span></h1>
+      <p>Quelques informations pour mieux me connaître.</p>
+    </header>
+
+    <div class="about-grid">
+      <article class="about-card about-intro-card">
+        <div class="about-portrait"><app-profile-image [imageUrl]="profile.profileImageUrl" [cacheVersion]="imageVersion()" [alt]="imageAlt(profile)" /></div>
+        <div class="about-identity">
+          @if (fullName(profile)) { <h2>{{ fullName(profile) }}</h2> }
+          @if (profile.professionalTitle) { <p class="professional-title">{{ profile.professionalTitle }}</p> }
+          <span class="availability-badge" [class.available]="profile.availability"><i aria-hidden="true"></i>{{ profile.availability ? 'Disponible' : 'Non disponible' }}</span>
+        </div>
+      </article>
+
+      @if (profile.biography) {
+        <article class="about-card biography-card">
+          <p class="card-kicker">Présentation</p>
+          <h2>À propos de moi</h2>
+          <p class="biography-text">{{ profile.biography }}</p>
+        </article>
+      }
+
+      @if (profile.email || profile.phone || profile.location) {
+        <article class="about-card details-card">
+          <p class="card-kicker">Informations</p>
+          <h2>Coordonnées</h2>
+          <dl class="profile-details">
+            @if (profile.email) { <div><dt>Email</dt><dd><a [href]="'mailto:' + profile.email">{{ profile.email }}</a></dd></div> }
+            @if (profile.phone) { <div><dt>Téléphone</dt><dd><a [href]="'tel:' + profile.phone">{{ profile.phone }}</a></dd></div> }
+            @if (profile.location) { <div><dt>Localisation</dt><dd>{{ profile.location }}</dd></div> }
+          </dl>
+        </article>
+      }
+
+      @if (profile.resumeUrl || profile.githubUrl || profile.linkedinUrl) {
+        <article class="about-card links-card">
+          <p class="card-kicker">Liens</p>
+          <h2>Retrouvez-moi</h2>
+          <nav class="profile-links" aria-label="Liens professionnels">
+            @if (profile.resumeUrl) { <a [href]="profile.resumeUrl" target="_blank" rel="noopener noreferrer">Curriculum vitæ <span aria-hidden="true">↗</span></a> }
+            @if (profile.githubUrl) { <a [href]="profile.githubUrl" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a> }
+            @if (profile.linkedinUrl) { <a [href]="profile.linkedinUrl" target="_blank" rel="noopener noreferrer">LinkedIn <span aria-hidden="true">↗</span></a> }
+          </nav>
+        </article>
+      }
+    </div>
+  }
+</section>

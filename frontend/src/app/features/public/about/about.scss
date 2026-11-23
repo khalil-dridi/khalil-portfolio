@@ -1,0 +1,41 @@
+@mixin styles {
+.about-page { max-width: 1080px; margin: 0 auto; }
+.about-heading { margin-bottom: 34px; }
+.about-eyebrow, .card-kicker { margin: 0 0 12px; color: var(--color-primary); font-size: 11px; font-weight: 760; letter-spacing: .14em; text-transform: uppercase; }
+.about-eyebrow { display: flex; align-items: center; gap: 9px; }
+.about-eyebrow span { width: 24px; height: 2px; background: var(--color-primary); }
+.about-heading h1 { margin: 0; color: var(--color-text); font-size: clamp(36px, 5vw, 54px); font-weight: 800; letter-spacing: -.055em; }
+.about-heading h1 span { color: var(--color-primary); }
+.about-heading > p:last-child { margin: 12px 0 0; color: var(--color-text-secondary); font-size: 16px; }
+.about-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: stretch; }
+.about-card { min-width: 0; padding: clamp(20px, 3vw, 30px); border: 1px solid var(--color-border); border-radius: var(--layout-radius-lg); background: var(--color-surface); box-shadow: var(--layout-shadow-card); }
+.about-card h2 { margin: 0; color: var(--color-text); font-size: 20px; font-weight: 750; letter-spacing: -.03em; }
+.about-intro-card { display: flex; align-items: center; gap: 22px; }
+.about-portrait { width: 112px; height: 112px; flex: 0 0 auto; overflow: hidden; border: 2px solid var(--color-primary-soft); border-radius: 50%; background: var(--color-primary-soft); }
+.about-identity { min-width: 0; }
+.about-identity h2 { overflow-wrap: anywhere; }
+.professional-title { margin: 7px 0 13px; color: var(--color-primary); font-size: 14px; font-weight: 650; line-height: 1.5; }
+.availability-badge { display: inline-flex; align-items: center; gap: 7px; padding: 6px 10px; border: 1px solid var(--color-border); border-radius: 999px; color: var(--color-text-secondary); font-size: 11px; font-weight: 650; }
+.availability-badge i { width: 7px; height: 7px; border-radius: 50%; background: var(--color-border); }
+.availability-badge.available i { background: var(--color-primary); }
+.biography-card { grid-row: span 2; }
+.biography-text { margin: 17px 0 0; color: var(--color-text-secondary); font-size: 14px; line-height: 1.85; white-space: pre-line; }
+.details-card, .links-card { align-self: start; }
+.profile-details { display: grid; gap: 14px; margin: 19px 0 0; }
+.profile-details div { min-width: 0; display: grid; gap: 5px; }
+.profile-details dt { color: var(--color-text-secondary); font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+.profile-details dd { min-width: 0; margin: 0; color: var(--color-text); font-size: 14px; overflow-wrap: anywhere; }
+.profile-details a, .profile-links a { color: inherit; text-decoration: none; transition: color .18s ease; }
+.profile-details a:hover, .profile-links a:hover { color: var(--color-primary); }
+.profile-links { display: grid; gap: 9px; margin-top: 18px; }
+.profile-links a { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 13px; border: 1px solid var(--color-border); border-radius: var(--layout-radius-sm); color: var(--color-text); font-size: 13px; font-weight: 650; }
+.profile-links a span { color: var(--color-primary); }
+.about-state { width: min(100%, 560px); display: flex; align-items: center; justify-content: center; gap: 14px; margin: 100px auto; padding: 28px; border: 1px solid var(--color-border); border-radius: var(--layout-radius-lg); background: var(--color-surface); color: var(--color-text-secondary); text-align: center; }
+.about-error-state { flex-direction: column; }
+.about-error-state p { margin: 0; }
+.about-button { min-height: 42px; padding: 0 15px; border: 1px solid var(--color-border); border-radius: var(--layout-radius-sm); background: var(--color-surface); color: var(--color-text); cursor: pointer; font: inherit; font-size: 13px; font-weight: 700; }
+.about-button:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.about-spinner { width: 19px; height: 19px; border: 2px solid var(--color-border); border-top-color: var(--color-primary); border-radius: 50%; animation: about-spin .7s linear infinite; }
+@media (max-width: 760px) { .about-grid { gap: 13px; } .about-intro-card { grid-column: 1 / -1; } .biography-card { grid-row: auto; } }
+@media (max-width: 560px) { .about-heading { margin-bottom: 24px; } .about-grid { grid-template-columns: 1fr; } .about-intro-card { grid-column: auto; gap: 16px; } .about-portrait { width: 88px; height: 88px; } .about-card { padding: 21px; } }
+}

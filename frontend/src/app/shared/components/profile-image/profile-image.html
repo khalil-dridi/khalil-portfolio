@@ -1,0 +1,10 @@
+<div class="profile-image-frame" [class.is-loading]="!!src() && !loaded()" [class.is-failed]="failed()">
+  @if (src() && !failed()) {
+    <img [src]="src()" [alt]="alt()" (load)="markLoaded()" (error)="markFailed()" />
+    @if (!loaded()) { <span class="image-skeleton" aria-hidden="true"></span> }
+  } @else {
+    <div class="image-fallback" role="img" aria-label="Aucune image de profil disponible">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="23" r="12"/><path d="M10 58a22 22 0 0 1 44 0"/></svg>
+    </div>
+  }
+</div>

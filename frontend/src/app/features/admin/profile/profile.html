@@ -1,1 +1,87 @@
-<h1>Profile</h1>
+<section class="profile-management" aria-labelledby="profile-management-title">
+  @if (loading()) {
+    <div class="profile-state" role="status"><span class="state-spinner" aria-hidden="true"></span>Chargement du profil administrateur…</div>
+  } @else if (loadError()) {
+    <div class="profile-state error-state" role="alert"><p>{{ loadError() }}</p><button class="profile-button profile-button-secondary" type="button" (click)="loadProfile()">Réessayer</button></div>
+  } @else if (profile(); as profile) {
+    <header class="profile-page-heading">
+      <div><p class="profile-eyebrow">Espace personnel</p><h2 id="profile-management-title">Profile Management</h2><p>Gérez les informations affichées sur votre portfolio.</p></div>
+      <span class="profile-updated">Mis à jour le {{ profile.updatedAt | date:'mediumDate' }}</span>
+    </header>
+
+    @if (successMessage()) { <p class="profile-notice success-notice" role="status" aria-live="polite">{{ successMessage() }}</p> }
+    @if (errorMessage()) { <p class="profile-notice error-notice" role="alert" aria-live="assertive">{{ errorMessage() }}</p> }
+
+    <article class="profile-overview profile-card">
+      <div class="overview-identity">
+        <div class="overview-image"><app-profile-image [imageUrl]="profile.profileImageUrl" [cacheVersion]="imageVersion()" [alt]="fullName(profile) ? 'Photo de ' + fullName(profile) : 'Photo de profil'" /></div>
+        <div class="overview-text">
+          <p class="profile-eyebrow">Profil public</p>
+          <h3>{{ fullName(profile) || 'Profil sans nom' }}</h3>
+          <p>{{ profile.professionalTitle || 'Titre professionnel non renseigné' }}</p>
+          <span class="availability-badge" [class.available]="profile.availability"><i aria-hidden="true"></i>{{ profile.availability ? 'Disponible' : 'Non disponible' }}</span>
+        </div>
+      </div>
+      <div class="completeness" aria-label="Complétude du profil">
+        <div class="completeness-copy"><span>Complétude du profil</span><strong>{{ completeness() }}%</strong></div>
+        <div class="progress-track" role="progressbar" [attr.aria-valuenow]="completeness()" aria-valuemin="0" aria-valuemax="100" aria-label="Complétude du profil"><span [style.width.%]="completeness()"></span></div>
+      </div>
+    </article>
+
+    <div class="profile-workspace">
+      <form class="profile-form profile-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="form-heading"><div><p class="profile-eyebrow">Informations</p><h3>Modifier le profil</h3></div><span class="required-note">Tous les champs sont facultatifs</span></div>
+
+        <fieldset class="form-fields" [disabled]="saving()">
+          <section class="form-section" aria-labelledby="personal-section-title">
+            <div class="section-heading"><span class="section-icon" aria-hidden="true">01</span><div><h4 id="personal-section-title">Informations personnelles</h4><p>Votre identité et vos coordonnées.</p></div></div>
+            <div class="form-grid">
+              <label class="form-field"><span>Prénom</span><input type="text" formControlName="firstName" maxlength="100" autocomplete="given-name" [attr.aria-invalid]="form.controls.firstName.touched && form.controls.firstName.invalid" aria-describedby="first-name-error" />@if (form.controls.firstName.touched && form.controls.firstName.hasError('maxlength')) { <small class="field-error" id="first-name-error">100 caractères maximum.</small> }</label>
+              <label class="form-field"><span>Nom</span><input type="text" formControlName="lastName" maxlength="100" autocomplete="family-name" [attr.aria-invalid]="form.controls.lastName.touched && form.controls.lastName.invalid" aria-describedby="last-name-error" />@if (form.controls.lastName.touched && form.controls.lastName.hasError('maxlength')) { <small class="field-error" id="last-name-error">100 caractères maximum.</small> }</label>
+              <label class="form-field"><span>Email</span><input type="email" formControlName="email" maxlength="254" autocomplete="email" [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid" aria-describedby="email-error" />@if (form.controls.email.touched && form.controls.email.invalid) { <small class="field-error" id="email-error">Saisissez une adresse email valide de 254 caractères maximum.</small> }</label>
+              <label class="form-field"><span>Téléphone</span><input type="tel" formControlName="phone" maxlength="50" autocomplete="tel" [attr.aria-invalid]="form.controls.phone.touched && form.controls.phone.invalid" aria-describedby="phone-error" />@if (form.controls.phone.touched && form.controls.phone.hasError('maxlength')) { <small class="field-error" id="phone-error">50 caractères maximum.</small> }</label>
+              <label class="form-field full-width"><span>Localisation</span><input type="text" formControlName="location" maxlength="180" autocomplete="address-level2" [attr.aria-invalid]="form.controls.location.touched && form.controls.location.invalid" aria-describedby="location-error" />@if (form.controls.location.touched && form.controls.location.hasError('maxlength')) { <small class="field-error" id="location-error">180 caractères maximum.</small> }</label>
+            </div>
+          </section>
+
+          <section class="form-section" aria-labelledby="professional-section-title">
+            <div class="section-heading"><span class="section-icon" aria-hidden="true">02</span><div><h4 id="professional-section-title">Informations professionnelles</h4><p>Présentez votre activité et votre disponibilité.</p></div></div>
+            <div class="form-grid">
+              <label class="form-field full-width"><span>Titre professionnel</span><input type="text" formControlName="professionalTitle" maxlength="180" [attr.aria-invalid]="form.controls.professionalTitle.touched && form.controls.professionalTitle.invalid" aria-describedby="title-error" />@if (form.controls.professionalTitle.touched && form.controls.professionalTitle.hasError('maxlength')) { <small class="field-error" id="title-error">180 caractères maximum.</small> }</label>
+              <label class="form-field full-width"><span>Biographie</span><textarea formControlName="biography" maxlength="10000" rows="7" [attr.aria-invalid]="form.controls.biography.touched && form.controls.biography.invalid" aria-describedby="biography-error"></textarea><small class="field-hint">{{ form.controls.biography.value.length }} / 10 000 caractères</small>@if (form.controls.biography.touched && form.controls.biography.hasError('maxlength')) { <small class="field-error" id="biography-error">10 000 caractères maximum.</small> }</label>
+              <label class="availability-control full-width"><input type="checkbox" formControlName="availability" /><span class="custom-checkbox" aria-hidden="true"></span><span><strong>Disponible pour de nouvelles opportunités</strong><small>Cette information sera visible sur le site public.</small></span></label>
+            </div>
+          </section>
+
+          <section class="form-section" aria-labelledby="links-section-title">
+            <div class="section-heading"><span class="section-icon" aria-hidden="true">03</span><div><h4 id="links-section-title">Liens professionnels</h4><p>Utilisez des adresses web complètes en HTTP ou HTTPS.</p></div></div>
+            <div class="form-grid">
+              <label class="form-field full-width"><span>URL du CV</span><input type="url" formControlName="resumeUrl" maxlength="2048" placeholder="https://…" [attr.aria-invalid]="form.controls.resumeUrl.touched && form.controls.resumeUrl.invalid" aria-describedby="resume-error" />@if (form.controls.resumeUrl.touched && form.controls.resumeUrl.invalid) { <small class="field-error" id="resume-error">Entrez une URL HTTP ou HTTPS valide (2048 caractères maximum).</small> }</label>
+              <label class="form-field"><span>GitHub</span><input type="url" formControlName="githubUrl" maxlength="2048" placeholder="https://github.com/…" [attr.aria-invalid]="form.controls.githubUrl.touched && form.controls.githubUrl.invalid" aria-describedby="github-error" />@if (form.controls.githubUrl.touched && form.controls.githubUrl.invalid) { <small class="field-error" id="github-error">Entrez une URL HTTP ou HTTPS valide.</small> }</label>
+              <label class="form-field"><span>LinkedIn</span><input type="url" formControlName="linkedinUrl" maxlength="2048" placeholder="https://linkedin.com/in/…" [attr.aria-invalid]="form.controls.linkedinUrl.touched && form.controls.linkedinUrl.invalid" aria-describedby="linkedin-error" />@if (form.controls.linkedinUrl.touched && form.controls.linkedinUrl.invalid) { <small class="field-error" id="linkedin-error">Entrez une URL HTTP ou HTTPS valide.</small> }</label>
+            </div>
+          </section>
+        </fieldset>
+
+        <footer class="form-actions"><span class="save-hint">Les modifications ne sont publiées qu’après enregistrement.</span><button class="profile-button profile-button-primary" type="submit" [disabled]="!form.dirty || form.invalid || saving()">@if (saving()) { <span class="button-spinner" aria-hidden="true"></span>Enregistrement… } @else { Enregistrer les modifications }</button></footer>
+      </form>
+
+      <aside class="image-management profile-card" aria-labelledby="image-section-title">
+        <div class="form-heading"><div><p class="profile-eyebrow">Portrait</p><h3 id="image-section-title">Photo de profil</h3></div></div>
+        <div class="image-preview" [class.has-preview]="!!selectedPreview()">
+          @if (selectedPreview(); as preview) { <img [src]="preview" alt="Aperçu de la nouvelle photo de profil" /> }
+          @else { <app-profile-image [imageUrl]="profile.profileImageUrl" [cacheVersion]="imageVersion()" [alt]="fullName(profile) ? 'Photo de ' + fullName(profile) : 'Photo de profil'" /> }
+        </div>
+        <p class="image-help">JPG, PNG ou WebP. Taille maximale : 5 Mio.</p>
+        @if (selectedFile(); as file) { <p class="selected-file">{{ file.name }} <span>{{ (file.size / 1024 / 1024).toFixed(2) }} Mio</span></p> }
+        <input #imageInput class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp" (change)="onFileSelected($event)" [disabled]="uploading() || deletingImage()" />
+        <div class="image-actions">
+          <button class="profile-button profile-button-secondary" type="button" (click)="imageInput.click()" [disabled]="uploading() || deletingImage()">Choisir une image</button>
+          @if (selectedFile()) { <button class="profile-button profile-button-primary" type="button" (click)="uploadImage(imageInput)" [disabled]="uploading() || deletingImage()">@if (uploading()) { <span class="button-spinner" aria-hidden="true"></span>Envoi… } @else { Téléverser }</button> }
+          @if (profile.profileImageUrl) { <button class="delete-image-button" type="button" (click)="deleteImage(imageInput)" [disabled]="uploading() || deletingImage()">@if (deletingImage()) { Suppression… } @else { Supprimer la photo }</button> }
+          @if (selectedFile()) { <button class="cancel-image-button" type="button" (click)="cancelImageSelection(imageInput)" [disabled]="uploading() || deletingImage()">Annuler l’aperçu</button> }
+        </div>
+      </aside>
+    </div>
+  }
+</section>

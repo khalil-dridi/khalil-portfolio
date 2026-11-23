@@ -1,4 +1,15 @@
 @use './app/features/admin/login/login';
+@use './app/layouts/layouts';
+@use './app/features/admin/profile/profile' as admin-profile;
+@use './app/features/public/home/home' as home-profile;
+@use './app/features/public/about/about' as about-profile;
+
+.app-layout--admin { @include admin-profile.styles; }
+.app-layout--public { @include home-profile.styles; @include about-profile.styles; }
+
+@keyframes profile-spin { to { transform: rotate(360deg); } }
+@keyframes about-spin { to { transform: rotate(360deg); } }
+@keyframes profile-manage-spin { to { transform: rotate(360deg); } }
 
 :root {
   color-scheme: light;
@@ -6,6 +17,11 @@
   --color-primary-hover: #dc1620;
   --color-primary-soft: rgb(242 29 39 / 9%);
   --color-primary-shadow: rgb(242 29 39 / 21%);
+  --accent-swatch-red: #f21d27;
+  --accent-swatch-orange: #f47a00;
+  --accent-swatch-green: #08a894;
+  --accent-swatch-blue: #155bd5;
+  --accent-swatch-pink: #e719b9;
   --color-background: #fbfaff;
   --color-surface: #fff;
   --color-sidebar: #fff;

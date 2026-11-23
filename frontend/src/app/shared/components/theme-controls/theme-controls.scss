@@ -1,0 +1,19 @@
+:host { display: block; }
+.theme-controls { display: flex; align-items: center; gap: 14px; }
+.round-control { width: 52px; height: 52px; display: grid; place-items: center; border: 1px solid var(--color-border); border-radius: 50%; background: var(--color-surface); color: var(--color-text); box-shadow: 0 5px 18px rgb(20 25 45 / 7%); cursor: pointer; transition: transform .2s ease, color .2s ease; }
+.round-control:hover { transform: translateY(-2px); color: var(--color-primary); }
+.round-control svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.accent-picker { min-width: 224px; margin: 0; padding: 12px 15px 14px; border: 1px solid var(--color-border); border-radius: 13px; background: var(--color-surface); box-shadow: 0 5px 18px rgb(20 25 45 / 6%); }
+.accent-picker legend { padding: 0 5px; color: var(--color-text); font-size: 13px; font-weight: 700; }
+.swatches { display: flex; gap: 10px; }
+.swatch { width: 29px; height: 29px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: var(--swatch); cursor: pointer; transition: transform .18s ease; }
+.swatch:hover { transform: scale(1.1); }
+.swatch[data-swatch="red"] { --swatch: var(--accent-swatch-red); }
+.swatch[data-swatch="orange"] { --swatch: var(--accent-swatch-orange); }
+.swatch[data-swatch="green"] { --swatch: var(--accent-swatch-green); }
+.swatch[data-swatch="blue"] { --swatch: var(--accent-swatch-blue); }
+.swatch[data-swatch="pink"] { --swatch: var(--accent-swatch-pink); }
+.swatch svg { width: 17px; height: 17px; fill: none; stroke: white; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+@media (max-width: 900px) { .theme-controls { gap: 9px; } .accent-picker { min-width: auto; } .swatches { gap: 7px; } }
+@media (max-width: 650px) { .theme-controls { gap: 9px; } .round-control { width: 42px; height: 42px; } .accent-picker { padding: 7px 10px 9px; } .accent-picker legend { font-size: 11px; } .swatch { width: 23px; height: 23px; } .swatches { gap: 6px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; } }

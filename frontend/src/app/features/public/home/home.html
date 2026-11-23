@@ -1,1 +1,48 @@
-<p>home works!</p>
+<section class="home-page" aria-labelledby="home-title">
+  @if (loading()) {
+    <div class="page-state loading-state" role="status"><span class="state-spinner" aria-hidden="true"></span><span>Chargement du profil…</span></div>
+  } @else if (errorMessage()) {
+    <div class="page-state error-state" role="alert">
+      <p>{{ errorMessage() }}</p>
+      <button class="button button-secondary" type="button" (click)="loadProfile()">Réessayer</button>
+    </div>
+  } @else if (profile(); as profile) {
+    <div class="home-hero">
+      <div class="hero-copy">
+        <p class="eyebrow"><span></span> Portfolio personnel</p>
+        <h1 id="home-title">
+          @if (fullName(profile)) { <span>{{ fullName(profile) }}</span> }
+          @if (profile.professionalTitle) { <span class="hero-title">{{ profile.professionalTitle }}</span> }
+          @if (!fullName(profile) && !profile.professionalTitle) { <span>Bienvenue</span> }
+        </h1>
+        @if (profile.biography) { <p class="hero-biography">{{ profile.biography }}</p> }
+
+        <div class="hero-status" [class.is-available]="profile.availability">
+          <span class="status-indicator" aria-hidden="true"></span>
+          <span>{{ profile.availability ? 'Disponible pour de nouvelles opportunités' : 'Non disponible actuellement' }}</span>
+        </div>
+
+        <div class="hero-actions">
+          <a class="button button-primary" routerLink="/about">En savoir plus <span aria-hidden="true">↗</span></a>
+          @if (profile.resumeUrl) {
+            <a class="button button-secondary" [href]="profile.resumeUrl" [attr.download]="fullName(profile) ? fullName(profile) + '-CV' : 'CV'">Télécharger le CV <span aria-hidden="true">↓</span></a>
+          }
+        </div>
+
+        @if (profile.githubUrl || profile.linkedinUrl) {
+          <nav class="hero-socials" aria-label="Réseaux professionnels">
+            @if (profile.githubUrl) { <a [href]="profile.githubUrl" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a> }
+            @if (profile.linkedinUrl) { <a [href]="profile.linkedinUrl" target="_blank" rel="noopener noreferrer">LinkedIn <span aria-hidden="true">↗</span></a> }
+          </nav>
+        }
+      </div>
+
+      <div class="hero-visual" aria-label="Portrait">
+        <span class="hero-frame hero-frame-top" aria-hidden="true"></span>
+        <app-profile-image class="hero-image" [imageUrl]="profile.profileImageUrl" [cacheVersion]="imageVersion()" [alt]="imageAlt(profile)" />
+        <span class="hero-frame hero-frame-bottom" aria-hidden="true"></span>
+        @if (profile.location) { <p class="location-chip"><span aria-hidden="true">⌖</span>{{ profile.location }}</p> }
+      </div>
+    </div>
+  }
+</section>
