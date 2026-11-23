@@ -47,6 +47,7 @@ describe('Profile', () => {
 
   it('loads the admin profile and initializes the form, including availability', () => {
     expect(fixture.nativeElement.textContent).toContain('Chargement du profil');
+    expect(component.completeness()).toBe(0);
     loadProfile();
     expect(component.profile()).toEqual(initialProfile);
     expect(component.form.controls.firstName.value).toBe('Ada');
@@ -55,6 +56,56 @@ describe('Profile', () => {
     expect(fixture.nativeElement.textContent).toContain('Profile Management');
     expect(fixture.nativeElement.textContent).toContain('Ada Lovelace');
     expect(fixture.nativeElement.textContent).toContain('100%');
+  });
+
+  it('shows a retryable loading error and normalizes nullable profile fields', () => {
+    http.expectOne('/api/admin/profile').flush({}, { status: 503, statusText: 'Unavailable' });
+    fixture.detectChanges();
+    expect(component.loading()).toBeFalse();
+    expect(fixture.nativeElement.querySelector('[role="alert"]')?.textContent).toContain('Impossible de charger');
+
+    component.loadProfile();
+    http.expectOne('/api/admin/profile').flush({
+      ...initialProfile, firstName: null, lastName: null, biography: null, email: null,
+      professionalTitle: null, phone: null, location: null, resumeUrl: null, githubUrl: null, linkedinUrl: null,
+      profileImageUrl: null,
+    });
+    fixture.detectChanges();
+    expect(component.profile()?.firstName).toBeNull();
+    expect(component.form.controls.firstName.value).toBe('');
+    expect(component.form.controls.email.value).toBe('');
+    expect(component.completeness()).toBe(0);
+  });
+
+  it('validates email, URL schemes and configured maximum lengths', () => {
+    loadProfile();
+    component.form.controls.email.setValue('ada@example.test');
+    component.form.controls.githubUrl.setValue('https://github.com/ada');
+    expect(component.form.valid).toBeTrue();
+    component.form.controls.email.setValue('invalid');
+    component.form.controls.resumeUrl.setValue('ftp://example.test/cv');
+    expect(component.form.controls.email.hasError('email')).toBeTrue();
+    expect(component.form.controls.resumeUrl.hasError('httpUrl')).toBeTrue();
+    component.form.controls.firstName.setValue('x'.repeat(101));
+    expect(component.form.controls.firstName.hasError('maxlength')).toBeTrue();
+    component.submit();
+    expect(component.form.controls.firstName.touched).toBeTrue();
+    http.expectNone('/api/admin/profile');
+  });
+
+  it('does not submit unchanged forms or start a second save while one is pending', () => {
+    loadProfile();
+    component.submit();
+    http.expectNone('/api/admin/profile');
+    component.form.controls.location.setValue('Paris');
+    component.form.controls.location.markAsDirty();
+    component.submit();
+    expect(component.saving()).toBeTrue();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('fieldset').disabled).toBeTrue();
+    component.submit();
+    http.expectOne('/api/admin/profile').flush({ ...initialProfile, location: 'Paris' });
+    expect(component.saving()).toBeFalse();
   });
 
   it('does not submit invalid email or URL values', () => {
@@ -92,6 +143,25 @@ describe('Profile', () => {
     expect(component.form.controls.firstName.value).toBe('');
     expect(component.form.pristine).toBeTrue();
     expect(component.successMessage()).toContain('enregistrées');
+  });
+
+  it('sends every edited form field when the full profile is changed', () => {
+    loadProfile();
+    const updates = {
+      firstName: 'Khalil', lastName: 'Dridi', professionalTitle: 'Architect',
+      biography: 'A refreshed biography.', email: 'khalil@example.test', phone: '+21612345678',
+      location: 'Tunis', resumeUrl: 'https://example.test/cv',
+      githubUrl: 'https://github.com/khalil', linkedinUrl: 'https://linkedin.com/in/khalil',
+      availability: true,
+    };
+    component.form.patchValue(updates);
+    Object.values(component.form.controls).forEach((control) => control.markAsDirty());
+    component.submit();
+
+    const request = http.expectOne('/api/admin/profile');
+    expect(request.request.body).toEqual(updates);
+    request.flush({ ...initialProfile, ...updates });
+    expect(component.form.pristine).toBeTrue();
   });
 
   it('reports update failures without discarding the edited values', () => {
@@ -150,6 +220,78 @@ describe('Profile', () => {
     expect(component.successMessage()).toContain('mise à jour');
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:profile-preview');
     expect(fixture.nativeElement.querySelector('.image-preview app-profile-image img')?.getAttribute('src')).toContain('?v=');
+  });
+
+  it('supports PNG selection and preview cancellation, including an empty selection', () => {
+    loadProfile();
+    const createPreview = spyOn(URL, 'createObjectURL').and.returnValue('blob:png-preview');
+    const revokePreview = spyOn(URL, 'revokeObjectURL');
+    const input = document.createElement('input');
+    Object.defineProperty(input, 'files', { configurable: true, value: [] });
+    component.onFileSelected({ target: input } as unknown as Event);
+    expect(component.selectedFile()).toBeNull();
+
+    const png = new File(['png'], 'portrait.png', { type: 'image/png' });
+    Object.defineProperty(input, 'files', { configurable: true, value: [png] });
+    component.onFileSelected({ target: input } as unknown as Event);
+    expect(createPreview).toHaveBeenCalledWith(png);
+    expect(component.selectedPreview()).toBe('blob:png-preview');
+    component.cancelImageSelection(input);
+    expect(component.selectedFile()).toBeNull();
+    expect(component.selectedPreview()).toBeNull();
+    expect(revokePreview).toHaveBeenCalledWith('blob:png-preview');
+  });
+
+  it('replaces and revokes the previous preview URL', () => {
+    loadProfile();
+    const createPreview = spyOn(URL, 'createObjectURL').and.returnValues('blob:first', 'blob:second');
+    const revokePreview = spyOn(URL, 'revokeObjectURL');
+    const input = document.createElement('input');
+    for (const name of ['first.jpg', 'second.webp']) {
+      const type = name.endsWith('.jpg') ? 'image/jpeg' : 'image/webp';
+      Object.defineProperty(input, 'files', { configurable: true, value: [new File(['x'], name, { type })] });
+      component.onFileSelected({ target: input } as unknown as Event);
+    }
+    expect(createPreview).toHaveBeenCalledTimes(2);
+    expect(component.selectedPreview()).toBe('blob:second');
+    expect(revokePreview).toHaveBeenCalledWith('blob:first');
+  });
+
+  it('keeps upload state through a pending request and reports upload and delete failures', () => {
+    loadProfile();
+    spyOn(URL, 'createObjectURL').and.returnValue('blob:pending');
+    const file = new File(['png'], 'portrait.png', { type: 'image/png' });
+    const input = document.createElement('input');
+    Object.defineProperty(input, 'files', { configurable: true, value: [file] });
+    component.onFileSelected({ target: input } as unknown as Event);
+    component.uploadImage(input);
+    expect(component.uploading()).toBeTrue();
+    component.cancelImageSelection(input);
+    expect(component.selectedFile()).toBe(file);
+    fixture.detectChanges();
+    expect((fixture.nativeElement.querySelector('.image-management input[type="file"]') as HTMLInputElement).disabled).toBeTrue();
+    component.uploadImage(input);
+    http.expectOne('/api/admin/profile/image').flush({}, { status: 500, statusText: 'Server Error' });
+    expect(component.uploading()).toBeFalse();
+    expect(component.errorMessage()).toContain('stockage de l’image');
+
+    component.deleteImage(input);
+    expect(component.deletingImage()).toBeTrue();
+    component.cancelImageSelection(input);
+    expect(component.selectedFile()).toBe(file);
+    http.expectOne('/api/admin/profile/image').flush({}, { status: 403, statusText: 'Forbidden' });
+    expect(component.deletingImage()).toBeFalse();
+    expect(component.errorMessage()).toContain('droits nécessaires');
+    expect(component.profile()?.profileImageUrl).toBe(initialProfile.profileImageUrl);
+  });
+
+  it('does not upload without a selection, delete a missing image, or cancel during a request', () => {
+    loadProfile({ ...initialProfile, profileImageUrl: null });
+    const input = document.createElement('input');
+    component.uploadImage(input);
+    component.deleteImage(input);
+    http.expectNone('/api/admin/profile/image');
+    expect(component.deletingImage()).toBeFalse();
   });
 
   it('shows server upload failures and deletes the current image', () => {

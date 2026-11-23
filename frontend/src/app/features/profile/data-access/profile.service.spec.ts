@@ -63,10 +63,12 @@ describe('ProfileService', () => {
     request.flush(null, { status: 204, statusText: 'No Content' });
   });
 
-  it('propagates backend errors to the caller', () => {
-    let status = 0;
-    service.getPublicProfile().subscribe({ error: (error: { status: number }) => status = error.status });
-    http.expectOne('/api/profile').flush({ message: 'Profile not found' }, { status: 404, statusText: 'Not Found' });
-    expect(status).toBe(404);
+  it('propagates each supported backend error status without changing it', () => {
+    for (const statusCode of [400, 401, 403, 404, 413, 415, 500]) {
+      let receivedStatus = 0;
+      service.getAdminProfile().subscribe({ error: (error: { status: number }) => receivedStatus = error.status });
+      http.expectOne('/api/admin/profile').flush({}, { status: statusCode, statusText: 'Backend error' });
+      expect(receivedStatus).withContext(`status ${statusCode}`).toBe(statusCode);
+    }
   });
 });

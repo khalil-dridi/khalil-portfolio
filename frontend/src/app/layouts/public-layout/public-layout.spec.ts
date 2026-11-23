@@ -23,4 +23,11 @@ describe('PublicLayout', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('closes the navigation menu after a route selection', () => {
+    component.menuOpen = true;
+    component.closeMenu();
+    expect(component.menuOpen).toBeFalse();
+    expect(component.year).toBe(new Date().getFullYear());
+  });
 });
