@@ -119,4 +119,85 @@ class ProfileServiceTest {
         assertThat(ProfileService.class.getMethod("upload",org.springframework.web.multipart.MultipartFile.class).isAnnotationPresent(jakarta.transaction.Transactional.class)).isTrue();
         assertThat(ProfileService.class.getMethod("deleteImage").isAnnotationPresent(jakarta.transaction.Transactional.class)).isTrue();
     }
+    @Test
+void imageContentShouldCompareArraysByContent() {
+    var first = new ProfileService.ImageContent(
+            new byte[]{1, 2, 3}, "image/png"
+    );
+
+    var second = new ProfileService.ImageContent(
+            new byte[]{1, 2, 3}, "image/png"
+    );
+
+    assertThat(first).isEqualTo(second);
+    assertThat(first.hashCode()).isEqualTo(second.hashCode());
+}
+
+@Test
+void imageContentShouldDetectDifferentValues() {
+    var content = new ProfileService.ImageContent(
+            new byte[]{1, 2, 3}, "image/png"
+    );
+
+    var differentBytes = new ProfileService.ImageContent(
+            new byte[]{4, 5, 6}, "image/png"
+    );
+
+    var differentType = new ProfileService.ImageContent(
+            new byte[]{1, 2, 3}, "image/jpeg"
+    );
+
+    assertThat(content).isNotEqualTo(differentBytes);
+    assertThat(content).isNotEqualTo(differentType);
+}
+
+@Test
+void imageContentEqualsShouldHandleIdentityNullAndDifferentTypes() {
+    var content = new ProfileService.ImageContent(
+            new byte[]{1, 2, 3}, "image/png"
+    );
+
+    assertThat(content.equals(content)).isTrue();
+    assertThat(content.equals(null)).isFalse();
+    assertThat(content.equals("not an ImageContent")).isFalse();
+}
+
+@Test
+void imageContentShouldProtectItsInternalByteArray() {
+    byte[] original = {1, 2, 3};
+
+    var content = new ProfileService.ImageContent(original, "image/png");
+
+    // Modification du tableau original
+    original[0] = 99;
+
+    assertThat(content.bytes()).containsExactly(1, 2, 3);
+
+    // Modification du tableau retourné
+    byte[] returned = content.bytes();
+    returned[0] = 99;
+
+    assertThat(content.bytes()).containsExactly(1, 2, 3);
+}
+
+@Test
+void imageContentShouldGenerateSafeToString() {
+    var content = new ProfileService.ImageContent(
+            new byte[]{1, 2, 3}, "image/png"
+    );
+
+    assertThat(content.toString())
+            .isEqualTo("ImageContent[bytes=3, contentType=image/png]");
+}
+
+@Test
+void imageContentShouldRejectNullValues() {
+    assertThatThrownBy(() ->
+            new ProfileService.ImageContent(null, "image/png")
+    ).isInstanceOf(NullPointerException.class);
+
+    assertThatThrownBy(() ->
+            new ProfileService.ImageContent(new byte[]{1}, null)
+    ).isInstanceOf(NullPointerException.class);
+}
 }
