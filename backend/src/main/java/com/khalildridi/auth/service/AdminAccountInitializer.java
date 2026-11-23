@@ -55,6 +55,7 @@ public class AdminAccountInitializer implements ApplicationRunner {
                 && atIndex == normalizedEmail.lastIndexOf('@')
                 && dotIndex >= 0
                 && dotIndex < normalizedEmail.length() - 1
+                && !normalizedEmail.endsWith(".")
                 && !containsWhitespace;
 
         if (!validEmail) {
