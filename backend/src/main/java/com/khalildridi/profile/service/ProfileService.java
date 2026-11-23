@@ -12,6 +12,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 @Service
 public class ProfileService {
     private final ProfileRepository repository;
@@ -61,5 +64,42 @@ public class ProfileService {
         try { return new ImageContent(storage.read(key), type); }
         catch (java.io.IOException e) { throw new ImageStorageException("Unable to read profile image", e); }
     }
-    public record ImageContent(byte[] bytes, String contentType) { }
+    public record ImageContent(byte[] bytes, String contentType) {
+
+        public ImageContent {
+            bytes = Objects.requireNonNull(bytes).clone();
+            contentType = Objects.requireNonNull(contentType);
+        }
+
+        @Override
+        public byte[] bytes() {
+            return bytes.clone();
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+
+            if (!(object instanceof ImageContent other)) {
+                return false;
+            }
+
+            return Arrays.equals(bytes, other.bytes)
+                    && Objects.equals(contentType, other.contentType);
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 * Arrays.hashCode(bytes)
+                    + Objects.hashCode(contentType);
+        }
+
+        @Override
+        public String toString() {
+            return "ImageContent[bytes=" + bytes.length
+                    + ", contentType=" + contentType + "]";
+        }
+    }
 }
