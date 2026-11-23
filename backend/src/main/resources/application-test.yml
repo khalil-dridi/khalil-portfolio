@@ -19,6 +19,8 @@ spring:
     locations: classpath:db/migration
 
 app:
+  profile:
+    image-storage-dir: ${java.io.tmpdir}/portfolio-profile-images
   security:
     jwt:
       secret: ${JWT_SECRET:}

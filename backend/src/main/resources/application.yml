@@ -5,6 +5,10 @@
 spring:
   application:
     name: portfolio-backend
+  servlet:
+    multipart:
+      max-file-size: ${PROFILE_IMAGE_MAX_SIZE:5MB}
+      max-request-size: ${PROFILE_IMAGE_MAX_SIZE:5MB}
 
   profiles:
     default: dev
@@ -38,6 +42,8 @@ management:
 # ==========================================
 
 app:
+  profile:
+    image-storage-dir: ${PROFILE_IMAGE_STORAGE_DIR:./var/profile-images}
   security:
     refresh-token-expiration: 7d
     access-token-expiration: 15m

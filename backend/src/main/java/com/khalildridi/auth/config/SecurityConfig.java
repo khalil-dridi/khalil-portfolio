@@ -73,7 +73,7 @@ public class SecurityConfig {
                         .accessDeniedHandler(new AccessDeniedHandlerImpl()))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/auth/login", "/api/auth/refresh", "/api/auth/logout",
-                                "/api/auth/csrf", "/actuator/health")
+                                "/api/auth/csrf", "/actuator/health", "/api/profile", "/api/profile/image")
                         .permitAll()
                         .requestMatchers("/api/auth/me").hasRole("ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
