@@ -74,7 +74,22 @@
         </div>
         <p class="image-help">JPG, PNG ou WebP. Taille maximale : 5 Mio.</p>
         @if (selectedFile(); as file) { <p class="selected-file">{{ file.name }} <span>{{ (file.size / 1024 / 1024).toFixed(2) }} Mio</span></p> }
-        <input #imageInput class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp" (change)="onFileSelected($event)" [disabled]="uploading() || deletingImage()" />
+        <label
+  for="profile-image-input"
+  class="visually-hidden"
+>
+  Sélectionner une photo de profil
+</label>
+
+<input
+  id="profile-image-input"
+  #imageInput
+  class="visually-hidden"
+  type="file"
+  accept="image/jpeg,image/png,image/webp"
+  (change)="onFileSelected($event)"
+  [disabled]="uploading() || deletingImage()"
+/>
         <div class="image-actions">
           <button class="profile-button profile-button-secondary" type="button" (click)="imageInput.click()" [disabled]="uploading() || deletingImage()">Choisir une image</button>
           @if (selectedFile()) { <button class="profile-button profile-button-primary" type="button" (click)="uploadImage(imageInput)" [disabled]="uploading() || deletingImage()">@if (uploading()) { <span class="button-spinner" aria-hidden="true"></span>Envoi… } @else { Téléverser }</button> }
