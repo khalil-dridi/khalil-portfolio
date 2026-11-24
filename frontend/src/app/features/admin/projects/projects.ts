@@ -91,13 +91,6 @@ export class AdminProjects implements OnDestroy {
   selectVideo(event: Event): void { this.selectFile(event, 'video'); }
   removeImageSelection(input?: HTMLInputElement): void { this.imageFile.set(null); this.revoke(this.imagePreview()); this.imagePreview.set(null); if (input) input.value = ''; }
   removeVideoSelection(input?: HTMLInputElement): void { this.videoFile.set(null); this.revoke(this.videoPreview()); this.videoPreview.set(null); if (input) input.value = ''; }
-  openPicker(input: HTMLInputElement, event?: KeyboardEvent): void {
-    if (event) {
-      if (event.key !== 'Enter' && event.key !== ' ') return;
-      event.preventDefault();
-    }
-    input.click();
-  }
   uploadSelected(kind: MediaKind): void {
     const project = this.detailsProject(); const file = kind === 'image' ? this.imageFile() : this.videoFile(); if (!project || !file || this.uploading()) return;
     this.retryProject.set(project); this.uploading.set(kind); const request = kind === 'image' ? this.api.uploadAdminImage(project.id, file) : this.api.uploadAdminVideo(project.id, file);

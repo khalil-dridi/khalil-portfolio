@@ -156,7 +156,7 @@ describe('AdminProjects', () => {
     expect(component.imagePreview()).toBe('blob:cover-preview');
   });
 
-  it('uses enabled type=button controls to open their matching create-modal pickers', () => {
+  it('associates create-modal picker labels with their inputs', () => {
     const component = fixture.componentInstance;
     const addButton = fixture.nativeElement.querySelector('.management-heading .primary-button') as HTMLButtonElement;
     expect(addButton.type).toBe('button');
@@ -165,17 +165,15 @@ describe('AdminProjects', () => {
     fixture.detectChanges();
     const imageInput: HTMLInputElement = fixture.nativeElement.querySelector('#create-project-image-input');
     const videoInput: HTMLInputElement = fixture.nativeElement.querySelector('#create-project-video-input');
-    const imageButton = fixture.nativeElement.querySelector('#create-project-image-button') as HTMLButtonElement;
-    const videoButton = fixture.nativeElement.querySelector('#create-project-video-button') as HTMLButtonElement;
+    const imageButton = fixture.nativeElement.querySelector('label[for="create-project-image-input"]') as HTMLLabelElement;
+    const videoButton = fixture.nativeElement.querySelector('label[for="create-project-video-input"]') as HTMLLabelElement;
 
     expect(imageInput).toBeTruthy();
     expect(videoInput).toBeTruthy();
     expect(imageButton).toBeTruthy();
     expect(videoButton).toBeTruthy();
-    expect(imageButton.type).toBe('button');
-    expect(videoButton.type).toBe('button');
-    expect(imageButton.disabled).toBeFalse();
-    expect(videoButton.disabled).toBeFalse();
+    expect(imageButton.htmlFor).toBe(imageInput.id);
+    expect(videoButton.htmlFor).toBe(videoInput.id);
     const imagePicker = spyOn(imageInput, 'showPicker');
     const videoPicker = spyOn(videoInput, 'showPicker');
     imageButton.click();
@@ -204,25 +202,26 @@ describe('AdminProjects', () => {
     expect(fixture.nativeElement.querySelector('.details-dialog')).toBeFalsy();
   });
 
-  it('opens file pickers from the details modal buttons', () => {
+  it('associates details-modal picker labels with their inputs', () => {
     const component = fixture.componentInstance;
     component.openDetails(project);
     fixture.detectChanges();
     const imageInput: HTMLInputElement = fixture.nativeElement.querySelector('#details-project-image-input');
     const videoInput: HTMLInputElement = fixture.nativeElement.querySelector('#details-project-video-input');
-    const buttons = fixture.nativeElement.querySelectorAll('.media-controls .file-button');
-    const imageButton: HTMLButtonElement = buttons[0];
-    const videoButton: HTMLButtonElement = buttons[1];
+    const imageButton = fixture.nativeElement.querySelector('label[for="details-project-image-input"]') as HTMLLabelElement;
+    const videoButton = fixture.nativeElement.querySelector('label[for="details-project-video-input"]') as HTMLLabelElement;
 
     expect(imageInput).toBeTruthy();
     expect(videoInput).toBeTruthy();
-    spyOn(imageInput, 'click');
+    expect(imageButton.htmlFor).toBe(imageInput.id);
+    expect(videoButton.htmlFor).toBe(videoInput.id);
+    const imagePicker = spyOn(imageInput, 'showPicker');
     imageButton.click();
-    expect(imageInput.click).toHaveBeenCalled();
+    expect(imagePicker).toHaveBeenCalledTimes(1);
 
-    spyOn(videoInput, 'click');
+    const videoPicker = spyOn(videoInput, 'showPicker');
     videoButton.click();
-    expect(videoInput.click).toHaveBeenCalled();
+    expect(videoPicker).toHaveBeenCalledTimes(1);
   });
 
   it('accepts JPG, JPEG, PNG, and WebP images and replaces and removes their preview URLs', () => {
@@ -430,10 +429,10 @@ describe('AdminProjects', () => {
     expect(imageInput.disabled).toBeFalse();
     expect(videoInput.type).toBe('file');
     expect(videoInput.disabled).toBeFalse();
-    const imageButton = createDialog.querySelector('#create-project-image-button') as HTMLButtonElement;
-    const videoButton = createDialog.querySelector('#create-project-video-button') as HTMLButtonElement;
-    expect(imageButton.type).toBe('button');
-    expect(videoButton.type).toBe('button');
+    const imageButton = createDialog.querySelector('label[for="create-project-image-input"]') as HTMLLabelElement;
+    const videoButton = createDialog.querySelector('label[for="create-project-video-input"]') as HTMLLabelElement;
+    expect(imageButton.htmlFor).toBe(imageInput.id);
+    expect(videoButton.htmlFor).toBe(videoInput.id);
     const imagePickerOpen = spyOn(imageInput, 'showPicker');
     const videoPickerOpen = spyOn(videoInput, 'showPicker');
     imageButton.click();
@@ -467,10 +466,10 @@ describe('AdminProjects', () => {
     const editVideo = editDialog.querySelector('#edit-project-video-input') as HTMLInputElement;
     expect(editImage).toBeTruthy();
     expect(editVideo).toBeTruthy();
-    const editImageButton = editDialog.querySelector('#edit-project-image-button') as HTMLButtonElement;
-    const editVideoButton = editDialog.querySelector('#edit-project-video-button') as HTMLButtonElement;
-    expect(editImageButton.type).toBe('button');
-    expect(editVideoButton.type).toBe('button');
+    const editImageButton = editDialog.querySelector('label[for="edit-project-image-input"]') as HTMLLabelElement;
+    const editVideoButton = editDialog.querySelector('label[for="edit-project-video-input"]') as HTMLLabelElement;
+    expect(editImageButton.htmlFor).toBe(editImage.id);
+    expect(editVideoButton.htmlFor).toBe(editVideo.id);
     const editImagePickerOpen = spyOn(editImage, 'showPicker');
     const editVideoPickerOpen = spyOn(editVideo, 'showPicker');
     editImageButton.click();
