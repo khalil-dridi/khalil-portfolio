@@ -3,6 +3,8 @@
 @use './app/features/admin/profile/profile' as admin-profile;
 @use './app/features/public/home/home' as home-profile;
 @use './app/features/public/about/about' as about-profile;
+@use './styles/public-projects';
+@use './styles/admin-projects';
 
 .app-layout--admin { @include admin-profile.styles; }
 .app-layout--public { @include home-profile.styles; @include about-profile.styles; }
