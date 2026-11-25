@@ -34,7 +34,8 @@ describe('About', () => {
     expect(text).toContain('A long professional biography.');
     expect(fixture.nativeElement.querySelector('a[href="mailto:grace@example.test"]')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('a[href^="tel:"]')).toBeNull();
-    expect(fixture.nativeElement.querySelector('a[href="https://example.test/resume"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('a[href="https://example.test/resume"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('a[href="https://linkedin.com/in/grace"]')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('app-profile-image img')?.getAttribute('src')).toMatch(/^\/api\/profile\/image\?v=/);
   });
 
