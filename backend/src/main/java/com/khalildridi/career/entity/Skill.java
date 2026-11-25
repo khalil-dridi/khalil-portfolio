@@ -15,15 +15,15 @@ public class Skill {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "name", nullable = false, length = 180)
+    @Column(name = "name", length = 180)
     private String name;
-    @Column(name = "category", nullable = false, length = 80)
+    @Column(name = "category", length = 80)
     private String category;
-    @Column(name = "level", nullable = false, length = 40)
+    @Column(name = "level", length = 40)
     private String level;
-    @Column(name = "icon", nullable = false, length = 120)
+    @Column(name = "icon", length = 120)
     private String icon;
-    @Column(name = "url", nullable = false, length = 2048)
+    @Column(name = "url", length = 2048)
     private String url;
     @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
     private LocalDateTime createdAt;

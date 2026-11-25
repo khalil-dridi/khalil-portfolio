@@ -1,6 +1,7 @@
 package com.khalildridi.career.service;
 
 import com.khalildridi.career.dto.request.ExperienceRequest;
+import com.khalildridi.career.dto.request.EducationRequest;
 import com.khalildridi.career.dto.request.SkillRequest;
 import com.khalildridi.career.entity.Skill;
 import com.khalildridi.career.exception.SkillNotFoundException;
@@ -34,6 +35,29 @@ class CareerServiceTest {
         var result = service.create(new SkillRequest(" Spring ", "Backend", "Advanced", "spring", "https://spring.io"));
         assertEquals("Spring", result.name());
         assertNull(result.id());
+    }
+
+    @Test void createsCompletelyEmptySkill() {
+        when(skills.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        var result = service.create(new SkillRequest(null, null, null, null, null));
+        assertNull(result.name());
+        assertNull(result.url());
+    }
+
+    @Test void createsPartiallyCompletedExperienceWithMissingDates() {
+        when(experiences.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        var result = service.create(new ExperienceRequest("Engineer", null, null, null, null, null, null, null));
+        assertEquals("Engineer", result.position());
+        assertNull(result.company());
+        assertNull(result.startDate());
+    }
+
+    @Test void createsCompletelyEmptyEducation() {
+        when(education.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        var result = service.create(new EducationRequest(null, null, null, null, null, null, null, null));
+        assertNull(result.institution());
+        assertNull(result.startDate());
+        assertNull(result.current());
     }
 
     @Test void rejectsReversedExperiencePeriodBeforePersistence() {

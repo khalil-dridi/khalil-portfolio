@@ -1,34 +1,34 @@
 export interface Skill {
   id: number;
-  name: string;
-  category: string;
-  level: string;
-  icon: string;
-  url: string;
+  name: string | null;
+  category: string | null;
+  level: string | null;
+  icon: string | null;
+  url: string | null;
 }
 
 export interface Experience {
   id: number;
-  position: string;
-  company: string;
-  location: string;
-  startDate: string;
-  endDate: string;
-  current: boolean;
-  description: string;
-  companyWebsite: string;
+  position: string | null;
+  company: string | null;
+  location: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  current: boolean | null;
+  description: string | null;
+  companyWebsite: string | null;
 }
 
 export interface Education {
   id: number;
-  institution: string;
-  degree: string;
-  fieldOfStudy: string;
-  startDate: string;
-  endDate: string;
-  current: boolean;
-  description: string;
-  institutionWebsite: string;
+  institution: string | null;
+  degree: string | null;
+  fieldOfStudy: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  current: boolean | null;
+  description: string | null;
+  institutionWebsite: string | null;
 }
 
 export interface CareerResponse {

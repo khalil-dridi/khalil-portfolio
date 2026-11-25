@@ -84,36 +84,53 @@
         @if (activeTab() === 'skills') {
           <form [formGroup]="skillForm" (ngSubmit)="save()" (input)="clearValidationError()" (change)="clearValidationError()" novalidate>
             @if (validationError()) { <p class="career-notice error" role="alert">{{ validationError() }}</p> }
-            <label>Name<input id="skill-name" formControlName="name" maxlength="180" autocomplete="off" required><small class="field-error">@if (skillForm.controls.name.touched && skillForm.controls.name.invalid) { Enter a name (maximum 180 characters). }</small></label>
-            <label>Category<input id="skill-category" formControlName="category" list="career-categories" maxlength="80" required><datalist id="career-categories"><option value="Frontend"><option value="Backend"><option value="Database"><option value="DevOps"><option value="Mobile"><option value="Tools"><option value="Programming Languages"><option value="Other"></datalist><small class="field-error">@if (skillForm.controls.category.touched && skillForm.controls.category.invalid) { Enter a category (maximum 80 characters). }</small></label>
-            <label>Level<select id="skill-level" formControlName="level" required><option value="" disabled>Select a level</option>@if (skillForm.controls.level.value && !['Beginner', 'Intermediate', 'Advanced', 'Expert'].includes(skillForm.controls.level.value)) { <option [value]="skillForm.controls.level.value">{{ skillForm.controls.level.value }}</option> }@for (level of ['Beginner', 'Intermediate', 'Advanced', 'Expert']; track level) { <option [value]="level">{{ level }}</option> }</select><small class="field-error">@if (skillForm.controls.level.touched && skillForm.controls.level.invalid) { Choose a level. }</small></label>
-            <label>Icon identifier<input id="skill-icon" formControlName="icon" maxlength="120" placeholder="e.g. spring" required><small class="field-hint">Technology identifier only; this is not an image URL.</small><small class="field-error">@if (skillForm.controls.icon.touched && skillForm.controls.icon.invalid) { Enter an icon identifier (maximum 120 characters). }</small></label>
-            <label>Website or documentation URL<input id="skill-url" formControlName="url" type="url" maxlength="2048" placeholder="https://example.com" required><small class="field-error">@if (skillForm.controls.url.touched && skillForm.controls.url.invalid) { Enter a valid HTTP(S) URL (maximum 2048 characters). }</small></label>
+            <label>Name<input id="skill-name" formControlName="name" maxlength="180" autocomplete="off"></label>
+            <label>Category<input id="skill-category" formControlName="category" list="career-categories" maxlength="80"><datalist id="career-categories"><option value="Frontend"><option value="Backend"><option value="Database"><option value="DevOps"><option value="Mobile"><option value="Tools"><option value="Programming Languages"><option value="Other"></datalist></label>
+            <label>Level<select id="skill-level" formControlName="level"><option value="" disabled>Select a level</option>@if (skillForm.controls.level.value && !['Beginner', 'Intermediate', 'Advanced', 'Expert'].includes(skillForm.controls.level.value)) { <option [value]="skillForm.controls.level.value">{{ skillForm.controls.level.value }}</option> }@for (level of ['Beginner', 'Intermediate', 'Advanced', 'Expert']; track level) { <option [value]="level">{{ level }}</option> }</select></label>
+            <div class="career-icon-field">
+              <span class="career-icon-label" id="skill-icon-label">Technology icon</span>
+              <input id="skill-icon" type="hidden" formControlName="icon">
+              <button #skillIconChooser class="career-icon-choice" type="button" aria-haspopup="dialog" aria-labelledby="skill-icon-label" (click)="iconPickerOpen.set(true)">
+                @if (technologyIcon(skillForm.controls.icon.value); as selectedIcon) {
+                  <span class="career-icon-choice-logo" aria-hidden="true"><img [src]="selectedIcon.assetPath" alt=""></span>
+                  <span class="career-icon-choice-copy"><strong>{{ selectedIcon.name }}</strong><small>{{ selectedIcon.id }}</small></span>
+                } @else if (skillForm.controls.icon.value) {
+                  <span class="career-icon-choice-logo legacy" aria-hidden="true">{{ iconLabel(skillForm.controls.icon.value) }}</span>
+                  <span class="career-icon-choice-copy"><strong>Current icon</strong><small>{{ skillForm.controls.icon.value }}</small></span>
+                } @else {
+                  <span class="career-icon-choice-logo empty" aria-hidden="true">＋</span>
+                  <span class="career-icon-choice-copy"><strong>Choose an icon</strong><small>Browse technology logos</small></span>
+                }
+                <span class="career-icon-choice-action">Choose Icon</span>
+              </button>
+              <small class="field-hint">Select a technology logo from the Devicon library.</small>
+            </div>
+            <label>Website or documentation URL<input id="skill-url" formControlName="url" type="url" maxlength="2048" placeholder="https://example.com"><small class="field-error">@if (skillForm.controls.url.touched && skillForm.controls.url.invalid) { Enter a valid HTTP(S) URL (maximum 2048 characters). }</small></label>
             <div class="career-dialog-actions"><button class="career-secondary" type="button" [disabled]="saving()" (click)="closeEditor()">Cancel</button><button class="career-primary" type="submit" [disabled]="saving()" (click)="$event.preventDefault(); save()">{{ saving() ? 'Saving…' : editingId() ? 'Save changes' : 'Create skill' }}</button></div>
           </form>
         } @else if (activeTab() === 'experience') {
           <form [formGroup]="experienceForm" (ngSubmit)="save()" (input)="clearValidationError()" (change)="clearValidationError()" novalidate>
             @if (validationError()) { <p class="career-notice error" role="alert">{{ validationError() }}</p> }
-            <label>Position<input id="experience-position" formControlName="position" maxlength="180" required><small class="field-error">@if (experienceForm.controls.position.touched && experienceForm.controls.position.invalid) { Enter a position (maximum 180 characters). }</small></label>
-            <label>Company<input id="experience-company" formControlName="company" maxlength="180" required><small class="field-error">@if (experienceForm.controls.company.touched && experienceForm.controls.company.invalid) { Enter a company (maximum 180 characters). }</small></label>
-            <label>Location<input id="experience-location" formControlName="location" maxlength="180" required><small class="field-error">@if (experienceForm.controls.location.touched && experienceForm.controls.location.invalid) { Enter a location (maximum 180 characters). }</small></label>
-            <div class="career-date-grid"><label>Start date<input id="experience-start" formControlName="startDate" type="date" required><small class="field-error">@if (experienceForm.controls.startDate.touched && experienceForm.controls.startDate.invalid) { Start date is required. }</small></label><label>{{ experienceForm.controls.current.value ? 'Expected End Date' : 'End Date' }}<input id="experience-end" formControlName="endDate" type="date" required><small class="field-error">@if (experienceForm.controls.endDate.touched && experienceForm.controls.endDate.hasError('required')) { End date is required. } @else if (experienceForm.controls.endDate.touched && periodInvalid(experienceForm.controls.startDate.value, experienceForm.controls.endDate.value)) { End date must be on or after the start date. }</small></label></div>
+            <label>Position<input id="experience-position" formControlName="position" maxlength="180"></label>
+            <label>Company<input id="experience-company" formControlName="company" maxlength="180"></label>
+            <label>Location<input id="experience-location" formControlName="location" maxlength="180"></label>
+            <div class="career-date-grid"><label>Start date<input id="experience-start" formControlName="startDate" type="date"></label><label>{{ experienceForm.controls.current.value ? 'Expected End Date' : 'End Date' }}<input id="experience-end" formControlName="endDate" type="date"></label></div>
             <label class="career-check"><input type="checkbox" formControlName="current"><span>Currently working here</span></label>
-            <label>Description<textarea id="experience-description" formControlName="description" rows="4" required></textarea><small class="field-error">@if (experienceForm.controls.description.touched && experienceForm.controls.description.invalid) { Enter a description. }</small></label>
-            <label>Company website<input id="experience-website" formControlName="companyWebsite" type="url" maxlength="2048" placeholder="https://example.com" required><small class="field-error">@if (experienceForm.controls.companyWebsite.touched && experienceForm.controls.companyWebsite.invalid) { Enter a valid HTTP(S) URL. }</small></label>
+            <label>Description<textarea id="experience-description" formControlName="description" rows="4"></textarea></label>
+            <label>Company website<input id="experience-website" formControlName="companyWebsite" type="url" maxlength="2048" placeholder="https://example.com"><small class="field-error">@if (experienceForm.controls.companyWebsite.touched && experienceForm.controls.companyWebsite.invalid) { Enter a valid HTTP(S) URL (maximum 2048 characters). }</small></label>
             @if (actionError()) { <p class="career-notice error" role="alert">{{ actionError() }}</p> }
             <div class="career-dialog-actions"><button class="career-secondary" type="button" [disabled]="saving()" (click)="closeEditor()">Cancel</button><button class="career-primary" type="submit" [disabled]="saving()" (click)="$event.preventDefault(); save()">{{ saving() ? 'Saving…' : editingId() ? 'Save changes' : 'Create experience' }}</button></div>
           </form>
         } @else {
           <form [formGroup]="educationForm" (ngSubmit)="save()" (input)="clearValidationError()" (change)="clearValidationError()" novalidate>
             @if (validationError()) { <p class="career-notice error" role="alert">{{ validationError() }}</p> }
-            <label>Institution<input id="education-institution" formControlName="institution" maxlength="180" required><small class="field-error">@if (educationForm.controls.institution.touched && educationForm.controls.institution.invalid) { Enter an institution (maximum 180 characters). }</small></label>
-            <label>Degree<input id="education-degree" formControlName="degree" maxlength="180" required><small class="field-error">@if (educationForm.controls.degree.touched && educationForm.controls.degree.invalid) { Enter a degree (maximum 180 characters). }</small></label>
-            <label>Field of study<input id="education-field" formControlName="fieldOfStudy" maxlength="180" required><small class="field-error">@if (educationForm.controls.fieldOfStudy.touched && educationForm.controls.fieldOfStudy.invalid) { Enter a field of study (maximum 180 characters). }</small></label>
-            <div class="career-date-grid"><label>Start date<input id="education-start" formControlName="startDate" type="date" required><small class="field-error">@if (educationForm.controls.startDate.touched && educationForm.controls.startDate.invalid) { Start date is required. }</small></label><label>{{ educationForm.controls.current.value ? 'Expected End Date' : 'End Date' }}<input id="education-end" formControlName="endDate" type="date" required><small class="field-error">@if (educationForm.controls.endDate.touched && educationForm.controls.endDate.hasError('required')) { End date is required. } @else if (educationForm.controls.endDate.touched && periodInvalid(educationForm.controls.startDate.value, educationForm.controls.endDate.value)) { End date must be on or after the start date. }</small></label></div>
+            <label>Institution<input id="education-institution" formControlName="institution" maxlength="180"></label>
+            <label>Degree<input id="education-degree" formControlName="degree" maxlength="180"></label>
+            <label>Field of study<input id="education-field" formControlName="fieldOfStudy" maxlength="180"></label>
+            <div class="career-date-grid"><label>Start date<input id="education-start" formControlName="startDate" type="date"></label><label>{{ educationForm.controls.current.value ? 'Expected End Date' : 'End Date' }}<input id="education-end" formControlName="endDate" type="date"></label></div>
             <label class="career-check"><input type="checkbox" formControlName="current"><span>Currently studying here</span></label>
-            <label>Description<textarea id="education-description" formControlName="description" rows="4" required></textarea><small class="field-error">@if (educationForm.controls.description.touched && educationForm.controls.description.invalid) { Enter a description. }</small></label>
-            <label>Institution website<input id="education-website" formControlName="institutionWebsite" type="url" maxlength="2048" placeholder="https://example.edu" required><small class="field-error">@if (educationForm.controls.institutionWebsite.touched && educationForm.controls.institutionWebsite.invalid) { Enter a valid HTTP(S) URL. }</small></label>
+            <label>Description<textarea id="education-description" formControlName="description" rows="4"></textarea></label>
+            <label>Institution website<input id="education-website" formControlName="institutionWebsite" type="url" maxlength="2048" placeholder="https://example.edu"><small class="field-error">@if (educationForm.controls.institutionWebsite.touched && educationForm.controls.institutionWebsite.invalid) { Enter a valid HTTP(S) URL (maximum 2048 characters). }</small></label>
             @if (actionError()) { <p class="career-notice error" role="alert">{{ actionError() }}</p> }
             <div class="career-dialog-actions"><button class="career-secondary" type="button" [disabled]="saving()" (click)="closeEditor()">Cancel</button><button class="career-primary" type="submit" [disabled]="saving()" (click)="$event.preventDefault(); save()">{{ saving() ? 'Saving…' : editingId() ? 'Save changes' : 'Create education' }}</button></div>
           </form>
@@ -121,6 +138,10 @@
         @if (actionError() && activeTab() === 'skills') { <p class="career-notice error" role="alert">{{ actionError() }}</p> }
       </section>
     </div>
+  }
+
+  @if (iconPickerOpen()) {
+    <app-technology-icon-picker [selectedIcon]="skillForm.controls.icon.value" (iconSelected)="chooseSkillIcon($event)" (dismiss)="closeIconPicker()" />
   }
 
   @if (deleteTarget(); as target) {

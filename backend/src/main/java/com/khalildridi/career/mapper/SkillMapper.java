@@ -7,7 +7,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SkillMapper {
-    public Skill toEntity(SkillRequest r) { return new Skill(r.name().trim(), r.category().trim(), r.level().trim(), r.icon().trim(), r.url().trim()); }
-    public void update(Skill e, SkillRequest r) { e.update(r.name().trim(), r.category().trim(), r.level().trim(), r.icon().trim(), r.url().trim()); }
+    public Skill toEntity(SkillRequest r) { return new Skill(trim(r.name()), trim(r.category()), trim(r.level()), trim(r.icon()), trim(r.url())); }
+    public void update(Skill e, SkillRequest r) { e.update(trim(r.name()), trim(r.category()), trim(r.level()), trim(r.icon()), trim(r.url())); }
     public SkillResponse toResponse(Skill e) { return new SkillResponse(e.getId(), e.getName(), e.getCategory(), e.getLevel(), e.getIcon(), e.getUrl()); }
+    private String trim(String value) { return value == null ? null : value.trim(); }
 }

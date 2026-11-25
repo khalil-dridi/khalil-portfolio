@@ -37,7 +37,7 @@ describe('AdminCareer', () => {
     expect(fixture.nativeElement.textContent).toContain('No skills yet');
   });
 
-  it('validates Skills and sends the complete trimmed create request', () => {
+  it('accepts an empty Skills form and sends the complete trimmed create request', () => {
     const component = fixture.componentInstance;
     component.openCreate();
     fixture.detectChanges();
@@ -45,11 +45,9 @@ describe('AdminCareer', () => {
     expect(createButton.disabled).toBeFalse();
     createButton.click();
     fixture.detectChanges();
-    expect(api.createSkill).not.toHaveBeenCalled();
-    expect(component.skillForm.valid).toBeFalse();
-    expect(component.skillForm.controls.name.touched).toBeTrue();
-    expect(fixture.nativeElement.textContent).toContain('Complete the required fields');
-    fixture.detectChanges();
+    expect(component.skillForm.valid).toBeTrue();
+    expect(api.createSkill).toHaveBeenCalledWith({ name: '', category: '', level: '', icon: '', url: '' });
+    component.openCreate();
     component.skillForm.setValue({ name: ' Spring Boot ', category: ' Backend ', level: 'Advanced', icon: 'spring', url: 'https://spring.io/projects/spring-boot' });
     expect(component.skillForm.valid).toBeTrue();
     fixture.detectChanges();
@@ -64,9 +62,31 @@ describe('AdminCareer', () => {
     const component = fixture.componentInstance;
     component.openSkillEdit({ id: 1, name: 'Spring Boot', category: 'Backend', level: 'Advanced', icon: 'spring', url: 'https://spring.io' });
     fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.career-icon-choice-copy strong').textContent.trim()).toBe('Spring / Spring Boot');
     component.skillForm.controls.level.setValue('Expert');
     (fixture.nativeElement.querySelector('.career-dialog-actions button[type="submit"]') as HTMLButtonElement).click();
     expect(api.updateSkill).toHaveBeenCalledWith(1, { name: 'Spring Boot', category: 'Backend', level: 'Expert', icon: 'spring', url: 'https://spring.io' });
+  });
+
+  it('creates a skill from a technology selected in the icon picker', () => {
+    const component = fixture.componentInstance;
+    component.openCreate();
+    component.skillForm.patchValue({ name: 'Angular', category: 'Frontend', level: 'Advanced', url: 'https://angular.dev' });
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('.career-icon-choice') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    const search: HTMLInputElement = fixture.nativeElement.querySelector('.picker-search input');
+    search.value = 'Angular';
+    search.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('[aria-label="Select Angular"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('.picker-confirm') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(component.skillForm.controls.icon.value).toBe('angular');
+    (fixture.nativeElement.querySelector('.career-dialog-actions button[type="submit"]') as HTMLButtonElement).click();
+    expect(api.createSkill).toHaveBeenCalledWith({ name: 'Angular', category: 'Frontend', level: 'Advanced', icon: 'angular', url: 'https://angular.dev' });
   });
 
   it('requires valid experience dates and always sends an expected end date for current roles', () => {
@@ -86,6 +106,19 @@ describe('AdminCareer', () => {
     expect(api.createExperience).toHaveBeenCalledWith({ position: 'Engineer', company: 'Example', location: 'Tunis', startDate: '2025-10-01', endDate: '2026-01-01', current: true, description: 'Built APIs', companyWebsite: 'https://example.com' });
   });
 
+  it('accepts empty and partially completed Experience forms', () => {
+    const component = fixture.componentInstance;
+    component.activeTab.set('experience');
+    component.openCreate();
+    component.save();
+    expect(api.createExperience).toHaveBeenCalledWith({ position: '', company: '', location: '', startDate: null, endDate: null, current: false, description: '', companyWebsite: '' });
+
+    component.openCreate();
+    component.experienceForm.controls.position.setValue('Developer');
+    component.save();
+    expect(api.createExperience).toHaveBeenCalledWith({ position: 'Developer', company: '', location: '', startDate: null, endDate: null, current: false, description: '', companyWebsite: '' });
+  });
+
   it('sends all Education fields and ISO dates when creating a current program', () => {
     const component = fixture.componentInstance;
     component.activeTab.set('education');
@@ -96,6 +129,19 @@ describe('AdminCareer', () => {
     (fixture.nativeElement.querySelector('.career-dialog-actions button[type="submit"]') as HTMLButtonElement).click();
     expect(api.createEducation).toHaveBeenCalledWith({ institution: 'ENIT', degree: 'Engineering Degree', fieldOfStudy: 'Software Engineering', startDate: '2022-09-01', endDate: '2027-06-30', current: true, description: 'Engineering studies.', institutionWebsite: 'https://www.enit.rnu.tn' });
     expect(component.education()[0].endDate).toBe('2027-06-30');
+  });
+
+  it('accepts empty and partially completed Education forms', () => {
+    const component = fixture.componentInstance;
+    component.activeTab.set('education');
+    component.openCreate();
+    component.save();
+    expect(api.createEducation).toHaveBeenCalledWith({ institution: '', degree: '', fieldOfStudy: '', startDate: null, endDate: null, current: false, description: '', institutionWebsite: '' });
+
+    component.openCreate();
+    component.educationForm.controls.degree.setValue('BSc');
+    component.save();
+    expect(api.createEducation).toHaveBeenCalledWith({ institution: '', degree: 'BSc', fieldOfStudy: '', startDate: null, endDate: null, current: false, description: '', institutionWebsite: '' });
   });
 
   it('sends a complete PUT request when editing Experience and Education', () => {

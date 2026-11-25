@@ -1,32 +1,22 @@
 <section class="contact-page" aria-labelledby="contact-title">
-  <header class="contact-hero">
-    <div class="hero-copy">
-      <p class="contact-eyebrow"><span></span> Get in touch</p>
-      <h1 id="contact-title">Let's work<br><span>together.</span></h1>
-      <p class="hero-description">Have a project in mind, an exciting opportunity, or simply want to connect? I'd love to hear from you. Let's create something meaningful together.</p>
-      <p class="availability"><span class="availability-dot" aria-hidden="true"></span> Open to new opportunities</p>
-    </div>
-    <div class="hero-art" aria-hidden="true">
-      <div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div>
-      <div class="art-core"><svg viewBox="0 0 64 64"><path d="M12 18h40v28H12z"/><path d="m14 21 18 14 18-14M14 44l13-11m23 11L37 33"/></svg></div>
-      <span class="art-spark spark-one">✳</span><span class="art-spark spark-two">·</span>
-    </div>
+  <header class="contact-page-heading">
+    <p class="contact-eyebrow"><span aria-hidden="true"></span> Get in touch</p>
+    <h1 id="contact-title">Contact</h1>
   </header>
 
   <div class="contact-grid">
     <section class="contact-card form-card" aria-labelledby="form-title">
       <div class="card-heading">
         <div><p class="card-kicker">Start a conversation</p><h2 id="form-title">Send me a message</h2></div>
-        <span class="card-index" aria-hidden="true">01</span>
       </div>
-      <p class="form-intro">Tell me a little about what you have in mind. Your email app will open with your message ready to send.</p>
+      <p class="form-intro">Tell me a little about what you have in mind.</p>
       <form [formGroup]="form" (ngSubmit)="sendMessage()" novalidate>
         <div class="form-row">
-          <label class="contact-field" for="contact-name">Full name
+          <label class="contact-field" for="contact-name">Full Name
             <input id="contact-name" formControlName="name" type="text" autocomplete="name" placeholder="Your full name" [attr.aria-invalid]="fieldInvalid('name')" aria-describedby="name-error">
             @if (fieldInvalid('name')) { <small class="field-error" id="name-error">Enter your name (up to 120 characters).</small> }
           </label>
-          <label class="contact-field" for="contact-email">Email address
+          <label class="contact-field" for="contact-email">Email Address
             <input id="contact-email" formControlName="email" type="email" autocomplete="email" placeholder="your@email.com" [attr.aria-invalid]="fieldInvalid('email')" aria-describedby="email-error">
             @if (fieldInvalid('email')) { <small class="field-error" id="email-error">Enter a valid email address.</small> }
           </label>
@@ -45,15 +35,13 @@
         <button class="send-button" type="submit" [disabled]="loading() || !profile()?.email">
           <span>Send Message</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 3-7.5 18-3.8-7.7L2 9.5 21 3Z"/><path d="M9.7 13.3 14 9"/></svg>
         </button>
-        <p class="form-footnote"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg> No forms sent to a server. Your message stays in your email app.</p>
       </form>
     </section>
 
     <aside class="contact-side">
       <section class="contact-card info-card" aria-labelledby="info-title">
         <div class="card-heading">
-          <div><p class="card-kicker">The details</p><h2 id="info-title">Find me here</h2></div>
-          <span class="card-index" aria-hidden="true">02</span>
+          <div><p class="card-kicker">Elsewhere online</p><h2 id="info-title">Find me here</h2></div>
         </div>
         <div class="contact-items">
           @if (profile()?.email; as email) {
@@ -74,16 +62,8 @@
               <span class="item-copy"><span class="item-label">GitHub</span><span class="item-value">Explore my work</span></span><span class="item-arrow" aria-hidden="true">↗</span>
             </a>
           }
-          <div class="contact-item location-item">
-            <span class="item-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
-            <span class="item-copy"><span class="item-label">Location</span><span class="item-value">{{ profile()?.location || 'Tunisia' }}</span></span>
-          </div>
         </div>
-        <div class="availability-panel"><span class="availability-dot" aria-hidden="true"></span><div><strong>Open to possibilities</strong><p>Professional opportunities, collaborations, and interesting projects are always welcome.</p></div></div>
       </section>
-      <div class="response-note"><span aria-hidden="true">✳</span><p>I value thoughtful conversations and aim to get back to you as soon as I can.</p></div>
     </aside>
   </div>
-
-  <footer class="contact-closing"><span aria-hidden="true">A note to begin</span><p>Good things start with <em>a conversation.</em></p><div class="closing-line" aria-hidden="true"></div></footer>
 </section>

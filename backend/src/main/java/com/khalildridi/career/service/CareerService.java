@@ -35,5 +35,5 @@ public class CareerService {
     @Transactional public void deleteSkill(Long id){skills.delete(skills.findById(id).orElseThrow(()->new SkillNotFoundException(id)));}
     @Transactional public void deleteExperience(Long id){experiences.delete(experiences.findById(id).orElseThrow(()->new ExperienceNotFoundException(id)));}
     @Transactional public void deleteEducation(Long id){education.delete(education.findById(id).orElseThrow(()->new EducationNotFoundException(id)));}
-    private void validateDates(java.time.LocalDate start,java.time.LocalDate end){if(end.isBefore(start))throw new IllegalArgumentException("endDate must not be before startDate");}
+    private void validateDates(java.time.LocalDate start,java.time.LocalDate end){if(start != null && end != null && end.isBefore(start))throw new IllegalArgumentException("endDate must not be before startDate");}
 }

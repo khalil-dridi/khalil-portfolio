@@ -1,75 +1,103 @@
 <main class="career-page">
-  <header class="career-hero">
-    <p class="career-kicker">The journey so far</p>
-    <h1>Career<span>.</span></h1>
-    <p>A look at the skills, experiences and education that shape my work.</p>
-    <nav class="career-index" aria-label="Career sections">
-      <a href="#skills">01 <span>Skills</span></a><a href="#experience">02 <span>Experience</span></a><a href="#education">03 <span>Education</span></a>
-    </nav>
-  </header>
+  <nav class="career-tabs" role="tablist" aria-label="Career sections" [attr.data-active]="activeTab()">
+    <span class="career-tabs-indicator" aria-hidden="true"></span>
+    @for (tab of tabs; track tab.id; let index = $index) {
+      <button type="button" role="tab" [id]="'career-tab-' + tab.id" [attr.aria-controls]="'career-panel-' + tab.id"
+        [attr.aria-selected]="activeTab() === tab.id"
+        [attr.tabindex]="activeTab() === tab.id ? 0 : -1" [class.is-active]="activeTab() === tab.id"
+        (click)="selectTab(tab.id)" (keydown)="onTabKeydown($event, index)">
+        <span class="career-tab-number">{{ tab.number }}</span>
+        <span class="career-tab-icon" aria-hidden="true">
+          @switch (tab.id) {
+            @case ('skills') { <svg viewBox="0 0 24 24"><path d="m8 8-4 4 4 4m8-8 4 4-4 4m-3-11-2 14"/></svg> }
+            @case ('experience') { <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></svg> }
+            @case ('education') { <svg viewBox="0 0 24 24"><path d="m2 9 10-5 10 5-10 5L2 9Zm4 2v5c3.5 3 8.5 3 12 0v-5m4-2v6"/></svg> }
+          }
+        </span>
+        <span class="career-tab-label">{{ tab.label }}</span>
+      </button>
+    }
+  </nav>
 
   @if (loading()) {
-    <div class="career-public-state" role="status"><span class="career-public-spinner"></span>Loading career information…</div>
+    <div class="career-state" role="status"><span class="career-spinner"></span>Loading career information…</div>
   } @else if (error()) {
-    <div class="career-public-state career-public-error" role="alert"><p>{{ error() }}</p><button type="button" (click)="load()">Try again</button></div>
+    <div class="career-state career-error" role="alert"><p>{{ error() }}</p><button type="button" (click)="load()">Try again</button></div>
   } @else {
-    <section class="career-section" id="skills" aria-labelledby="skills-title">
-      <div class="section-heading"><span>01</span><div><p>What I work with</p><h2 id="skills-title">Skills</h2></div></div>
-      @if (skillGroups().length) {
-        <div class="skill-groups">
-          @for (group of skillGroups(); track group.category) {
-            <section class="skill-group" [attr.aria-label]="group.category + ' skills'"><h3>{{ group.category }}</h3>
-              <div class="skill-grid">
-                @for (skill of group.items; track skill.id) {
-                  @if (externalUrl(skill.url); as url) {
-                    <a class="public-skill-card" [href]="url" target="_blank" rel="noopener noreferrer" [attr.aria-label]="skill.name + ', ' + skill.level + ', opens in a new tab'">
-                      <span class="public-skill-icon" aria-hidden="true">{{ iconLabel(skill.icon) }}</span>
-                      <span class="public-skill-copy"><strong>{{ skill.name }}</strong><small>{{ skill.level }}</small></span>
-                      <span class="public-skill-link" aria-hidden="true">↗</span>
-                    </a>
-                  } @else {
-                    <div class="public-skill-card"><span class="public-skill-icon" aria-hidden="true">{{ iconLabel(skill.icon) }}</span><span class="public-skill-copy"><strong>{{ skill.name }}</strong><small>{{ skill.level }}</small></span></div>
-                  }
+    <div class="career-view" role="tabpanel"
+      [id]="'career-panel-' + activeTab()" [attr.aria-labelledby]="'career-tab-' + activeTab()" tabindex="0">
+      @switch (activeTab()) {
+        @case ('skills') {
+          <section class="career-interface skills-interface" aria-labelledby="skills-title">
+            <header class="interface-heading"><div><p class="interface-eyebrow">WHAT I WORK WITH</p><h1 id="skills-title">Skills</h1></div><span class="interface-index">01 <i>—</i> 03</span></header>
+            @if (skillGroups().length) {
+              <div class="skill-groups">
+                @for (group of skillGroups(); track group.category) {
+                  <section class="skill-category" [attr.aria-label]="group.category + ' skills'">
+                    <header class="category-heading"><h2>{{ group.category }}</h2><span>{{ group.skills.length }} {{ group.skills.length === 1 ? 'skill' : 'skills' }}</span></header>
+                    <div class="technology-grid">
+                      @for (skill of group.skills; track skill.id; let index = $index) {
+                        <article class="technology-card" [style.--item-index]="index">
+                          <span class="technology-logo" aria-hidden="true">
+                            @if (technologyIcon(skill.icon); as icon) { <img [src]="icon.assetPath" alt="" loading="lazy"> }
+                            @else { <span>{{ iconLabel(skill.icon) }}</span> }
+                          </span>
+                          <span class="technology-copy"><strong>{{ skill.name }}</strong>@if (skill.level) { <small>{{ skill.level }}</small> }</span>
+                          @if (externalUrl(skill.url); as url) { <a class="technology-link" [href]="url" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Visit ' + (skill.name || 'skill') + ' website (opens in a new tab)'" title="Open website"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6m0-6-9 9"/><path d="M18 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6"/></svg></a> }
+                        </article>
+                      }
+                    </div>
+                  </section>
                 }
               </div>
-            </section>
-          }
-        </div>
-      } @else { <div class="career-empty"><span class="empty-mark" aria-hidden="true">✳</span><div><h3>Skills are on the way</h3><p>There are no skills to display yet.</p></div></div> }
-    </section>
-
-    <section class="career-section" id="experience" aria-labelledby="experience-title">
-      <div class="section-heading"><span>02</span><div><p>Where I have contributed</p><h2 id="experience-title">Professional Experience</h2></div></div>
-      @if (career().experiences.length) {
-        <div class="career-timeline">
-          @for (item of career().experiences; track item.id) {
-            <article class="timeline-item"><span class="timeline-marker" aria-hidden="true"></span>
-              <div class="timeline-card"><div class="timeline-topline"><p class="timeline-period">{{ range(item.startDate, item.endDate, item.current) }}</p>@if (item.current) { <span class="timeline-current">Current</span> }</div>
-                <h3>{{ item.position }}</h3><p class="timeline-organization">{{ item.company }}<span> · </span>{{ item.location }}</p>
-                <p class="timeline-description">{{ item.description }}</p>
-                @if (externalUrl(item.companyWebsite); as url) { <a class="timeline-link" [href]="url" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Visit ' + item.company + ' website (opens in a new tab)'">Visit company website <span aria-hidden="true">↗</span></a> }
+            } @else {
+              <div class="career-empty"><span class="empty-mark" aria-hidden="true">✳</span><div><h2>No skills yet</h2><p>There are no skills to display yet.</p></div></div>
+            }
+          </section>
+        }
+        @case ('experience') {
+          <section class="career-interface" aria-labelledby="experience-title">
+            <header class="interface-heading"><div><p class="interface-eyebrow">WHERE I HAVE CONTRIBUTED</p><h1 id="experience-title">Experience</h1></div><span class="interface-index">02 <i>—</i> 03</span></header>
+            @if (career().experiences.length) {
+              <div class="career-timeline">
+                @for (item of career().experiences; track item.id; let index = $index) {
+                  <article class="timeline-item" [style.--item-index]="index">
+                    <span class="timeline-marker" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"/></svg></span>
+                    <div class="timeline-card"><div class="timeline-topline"><p class="timeline-period">{{ range(item.startDate, item.endDate, item.current) }}</p>@if (item.current) { <span class="timeline-current">Current</span> }</div>
+                      <h2>{{ item.position }}</h2><p class="timeline-organization">{{ item.company }}@if (item.company && item.location) { <span> · </span> }{{ item.location }}</p>
+                      @if (item.description) { <p class="timeline-description">{{ item.description }}</p> }
+                      @if (externalUrl(item.companyWebsite); as url) { <a class="timeline-link" [href]="url" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Visit ' + (item.company || 'company') + ' website (opens in a new tab)'">Visit company website <span aria-hidden="true">↗</span></a> }
+                    </div>
+                  </article>
+                }
               </div>
-            </article>
-          }
-        </div>
-      } @else { <div class="career-empty career-empty--timeline"><span class="empty-mark" aria-hidden="true">↗</span><div><h3>Experience will appear here</h3><p>There are no professional experiences to display yet.</p></div></div> }
-    </section>
-
-    <section class="career-section" id="education" aria-labelledby="education-title">
-      <div class="section-heading"><span>03</span><div><p>How I have learned</p><h2 id="education-title">Education</h2></div></div>
-      @if (career().education.length) {
-        <div class="career-timeline career-timeline--education">
-          @for (item of career().education; track item.id) {
-            <article class="timeline-item"><span class="timeline-marker" aria-hidden="true"></span>
-              <div class="timeline-card"><div class="timeline-topline"><p class="timeline-period">{{ range(item.startDate, item.endDate, item.current) }}</p>@if (item.current) { <span class="timeline-current">Current</span> }</div>
-                <h3>{{ item.institution }}</h3><p class="timeline-organization">{{ item.degree }}<span> · </span>{{ item.fieldOfStudy }}</p>
-                <p class="timeline-description">{{ item.description }}</p>
-                @if (externalUrl(item.institutionWebsite); as url) { <a class="timeline-link" [href]="url" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Visit ' + item.institution + ' website (opens in a new tab)'">Visit institution website <span aria-hidden="true">↗</span></a> }
+            } @else {
+              <div class="career-empty"><span class="empty-mark" aria-hidden="true">↗</span><div><h2>No experience yet</h2><p>There are no professional experiences to display yet.</p></div></div>
+            }
+          </section>
+        }
+        @case ('education') {
+          <section class="career-interface" aria-labelledby="education-title">
+            <header class="interface-heading"><div><p class="interface-eyebrow">HOW I HAVE LEARNED</p><h1 id="education-title">Education</h1></div><span class="interface-index">03 <i>—</i> 03</span></header>
+            @if (career().education.length) {
+              <div class="career-timeline career-timeline--education">
+                @for (item of career().education; track item.id; let index = $index) {
+                  <article class="timeline-item" [style.--item-index]="index">
+                    <span class="timeline-marker" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m2 9 10-5 10 5-10 5L2 9Zm4 2v5c3.5 3 8.5 3 12 0v-5m4-2v6"/></svg></span>
+                    <div class="timeline-card"><div class="timeline-topline"><p class="timeline-period">{{ range(item.startDate, item.endDate, item.current) }}</p>@if (item.current) { <span class="timeline-current">Current</span> }</div>
+                      <h2>{{ item.degree }}</h2><p class="timeline-organization">{{ item.institution }}@if (item.institution && item.fieldOfStudy) { <span> · </span> }{{ item.fieldOfStudy }}</p>
+                      @if (item.description) { <p class="timeline-description">{{ item.description }}</p> }
+                      @if (externalUrl(item.institutionWebsite); as url) { <a class="timeline-link" [href]="url" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'Visit ' + (item.institution || 'institution') + ' website (opens in a new tab)'">Visit institution website <span aria-hidden="true">↗</span></a> }
+                    </div>
+                  </article>
+                }
               </div>
-            </article>
-          }
-        </div>
-      } @else { <div class="career-empty career-empty--timeline"><span class="empty-mark" aria-hidden="true">⌂</span><div><h3>Education will appear here</h3><p>There are no education details to display yet.</p></div></div> }
-    </section>
+            } @else {
+              <div class="career-empty"><span class="empty-mark" aria-hidden="true">⌂</span><div><h2>No education yet</h2><p>There are no education details to display yet.</p></div></div>
+            }
+          </section>
+        }
+      }
+    </div>
   }
 </main>

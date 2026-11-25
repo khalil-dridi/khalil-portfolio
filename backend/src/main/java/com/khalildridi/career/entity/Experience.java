@@ -15,21 +15,21 @@ public class Experience {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "position", nullable = false, length = 180)
+    @Column(name = "position", length = 180)
     private String position;
-    @Column(name = "company", nullable = false, length = 180)
+    @Column(name = "company", length = 180)
     private String company;
-    @Column(name = "location", nullable = false, length = 180)
+    @Column(name = "location", length = 180)
     private String location;
-    @Column(name = "start_date", nullable = false)
+    @Column(name = "start_date")
     private LocalDate startDate;
-    @Column(name = "end_date", nullable = false)
+    @Column(name = "end_date")
     private LocalDate endDate;
-    @Column(name = "current", nullable = false)
+    @Column(name = "current")
     private Boolean current;
-    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
-    @Column(name = "company_website", nullable = false, length = 2048)
+    @Column(name = "company_website", length = 2048)
     private String companyWebsite;
     @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
     private LocalDateTime createdAt;

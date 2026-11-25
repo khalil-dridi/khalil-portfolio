@@ -1,0 +1,60 @@
+<div class="technology-picker-backdrop" (click)="onBackdropClick($event)">
+  <section #dialog class="technology-picker-dialog" role="dialog" aria-modal="true" aria-labelledby="technology-picker-title" aria-describedby="technology-picker-help" (keydown)="onDialogKeydown($event)">
+    <header class="picker-heading">
+      <div>
+        <p class="picker-eyebrow">DEVICON LIBRARY</p>
+        <h2 id="technology-picker-title">Choose a technology icon</h2>
+        <p id="technology-picker-help">Search or browse a category, then select an icon for this skill.</p>
+      </div>
+      <button class="picker-close" type="button" aria-label="Close icon picker" (click)="close()">×</button>
+    </header>
+
+    <label class="picker-search">
+      <span aria-hidden="true">⌕</span>
+      <span class="picker-visually-hidden">Search technologies</span>
+      <input #searchInput type="search" [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" placeholder="Search Java, MySQL, Angular…" autocomplete="off">
+      <kbd>/</kbd>
+    </label>
+
+    <nav class="picker-categories" aria-label="Technology categories">
+      @for (category of categories; track category) {
+        <button type="button" [class.is-active]="activeCategory() === category" [attr.aria-pressed]="activeCategory() === category" (click)="activeCategory.set(category)">{{ category }}</button>
+      }
+    </nav>
+
+    <div class="picker-content">
+      <section class="picker-library" aria-label="Available technology icons">
+        <div class="picker-results-heading"><h3>{{ activeCategory() }}</h3><span>{{ filteredIcons().length }} {{ filteredIcons().length === 1 ? 'icon' : 'icons' }}</span></div>
+        @if (filteredIcons().length) {
+          <div class="picker-grid" aria-label="Technology icons">
+            @for (icon of filteredIcons(); track icon.id) {
+              <button class="picker-icon-option" type="button" [class.is-selected]="draftId() === icon.id" [attr.aria-pressed]="draftId() === icon.id" [attr.aria-label]="'Select ' + icon.name" (click)="choose(icon)">
+                <img [src]="icon.assetPath" alt="" aria-hidden="true">
+                <span>{{ icon.name }}</span>
+              </button>
+            }
+          </div>
+        } @else {
+          <div class="picker-empty" role="status"><span aria-hidden="true">⌕</span><strong>No matching technologies</strong><p>Try a different name or category.</p></div>
+        }
+      </section>
+
+      <aside class="picker-selection" aria-label="Selected technology">
+        <p class="picker-selection-label">Selected icon</p>
+        @if (previewIcon(); as selected) {
+          <span class="picker-preview-logo" aria-hidden="true"><img [src]="selected.assetPath" alt=""></span>
+          <strong class="picker-selected-name">{{ selected.name }}</strong>
+          <code>{{ selected.id }}</code>
+        } @else {
+          <span class="picker-preview-logo is-empty" aria-hidden="true">＋</span>
+          <strong class="picker-selected-name is-muted">No icon selected</strong>
+          <span class="picker-selected-hint">Choose an icon from the library.</span>
+        }
+        <div class="picker-selection-actions">
+          <button class="picker-clear" type="button" [disabled]="!draftId() && !selectedIcon()" (click)="clear()">Clear selection</button>
+          <button class="career-primary picker-confirm" type="button" [disabled]="!draftId()" (click)="confirm()">Confirm selection</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+</div>
