@@ -18,13 +18,9 @@ export class AdminLayout {
   get pageTitle(): string {
     const path = this.router.url.split('?')[0].replace(/\/$/, '');
     const titles: Record<string, string> = {
-      '/admin': 'Dashboard',
       '/admin/profile': 'Profile',
       '/admin/projects': 'Projects',
-      '/admin/skills': 'Skills',
-      '/admin/experiences': 'Experiences',
-      '/admin/education': 'Education',
-      '/admin/messages': 'Messages',
+      '/admin/career': 'Career',
     };
     return titles[path] ?? 'Administration';
   }

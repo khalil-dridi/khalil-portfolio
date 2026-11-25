@@ -21,9 +21,8 @@ describe('application lazy routes', () => {
     await resolveRoutes(routes);
 
     expect(componentNames).toEqual(jasmine.arrayContaining([
-      'PublicLayout', 'Home', 'About', 'Skills', 'Projects', 'ProjectDetails', 'Contact',
-      'Login', 'AdminLayout', 'Dashboard', 'Profile', 'AdminProjects', 'AdminSkills',
-      'Experiences', 'Education', 'Messages', 'NotFound',
+      'PublicLayout', 'Home', 'About', 'Career', 'Projects', 'ProjectDetails', 'Contact',
+      'Login', 'AdminLayout', 'Profile', 'AdminProjects', 'AdminCareer', 'NotFound',
     ]));
   });
 });

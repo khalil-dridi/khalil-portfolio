@@ -7,7 +7,8 @@ export const PUBLIC_ROUTES: Routes = [
     children: [
       { path: '', pathMatch: 'full', loadComponent: () => import('./home/home').then((module) => module.Home) },
       { path: 'about', loadComponent: () => import('./about/about').then((module) => module.About) },
-      { path: 'skills', loadComponent: () => import('./skills/skills').then((module) => module.Skills) },
+      { path: 'career', loadComponent: () => import('./career/career').then((module) => module.Career) },
+      { path: 'skills', pathMatch: 'full', redirectTo: 'career' },
       { path: 'projects', pathMatch: 'full', loadComponent: () => import('./projects/projects').then((module) => module.Projects) },
       { path: 'projects/:slug', loadComponent: () => import('./project-details/project-details').then((module) => module.ProjectDetails) },
       { path: 'contact', loadComponent: () => import('./contact/contact').then((module) => module.Contact) },

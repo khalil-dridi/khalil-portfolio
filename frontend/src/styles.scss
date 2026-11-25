@@ -5,9 +5,12 @@
 @use './app/features/public/about/about' as about-profile;
 @use './styles/public-projects';
 @use './styles/admin-projects';
+@use './styles/admin-career';
+@use './styles/public-career';
+@use './styles/public-contact';
 
 .app-layout--admin { @include admin-profile.styles; }
-.app-layout--public { @include home-profile.styles; @include about-profile.styles; }
+.app-layout--public { @include home-profile.styles; @include about-profile.styles; @include public-contact.styles; }
 
 @keyframes profile-spin { to { transform: rotate(360deg); } }
 @keyframes about-spin { to { transform: rotate(360deg); } }

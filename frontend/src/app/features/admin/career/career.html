@@ -1,0 +1,136 @@
+<section class="career-admin" aria-labelledby="career-title">
+  <header class="career-admin-heading">
+    <p class="career-eyebrow">Portfolio management</p>
+    <h2 id="career-title">Career Management</h2>
+    <p>Manage your skills, professional experience and education.</p>
+  </header>
+
+  @if (successMessage()) { <p class="career-notice success" role="status">{{ successMessage() }}</p> }
+  @if (loadError()) { <p class="career-notice error" role="alert">{{ loadError() }} <button type="button" (click)="loadList()">Retry</button></p> }
+
+  <div class="career-tabs" role="tablist" aria-label="Career sections">
+    @for (tab of tabs; track tab.id) {
+      <button type="button" role="tab" [id]="'tab-' + tab.id" [attr.aria-selected]="activeTab() === tab.id"
+        [attr.aria-controls]="'panel-' + tab.id" [class.is-active]="activeTab() === tab.id" (click)="selectTab(tab.id)">
+        {{ tab.label }}
+      </button>
+    }
+  </div>
+
+  <section class="career-panel" role="tabpanel" [id]="'panel-' + activeTab()" [attr.aria-labelledby]="'tab-' + activeTab()">
+    <div class="panel-heading">
+      <div><h3>{{ activeTab() === 'skills' ? 'Skills' : activeTab() === 'experience' ? 'Professional experience' : 'Education' }}</h3>
+        <p>{{ activeTab() === 'skills' ? 'Keep your technical strengths up to date.' : activeTab() === 'experience' ? 'Manage your work history and current roles.' : 'Manage your academic background and training.' }}</p>
+      </div>
+      <button class="career-primary" type="button" (click)="openCreate()">+ Add {{ activeTab() === 'skills' ? 'Skill' : activeTab() === 'experience' ? 'Experience' : 'Education' }}</button>
+    </div>
+
+    @if (loading()) { <div class="career-state" role="status"><span class="career-spinner"></span> Loading career information…</div> }
+    @else {
+      @switch (activeTab()) {
+        @case ('skills') {
+          @if (skills().length) {
+            <div class="admin-skill-list">
+              @for (skill of skills(); track skill.id) {
+                <article class="admin-career-card skill-admin-card">
+                  <span class="career-icon" aria-hidden="true">{{ iconLabel(skill.icon) }}</span>
+                  <div class="career-card-content"><h4>{{ skill.name }}</h4><p>{{ skill.category }} <span>·</span> {{ skill.level }}</p>
+                    <a [href]="skill.url" target="_blank" rel="noopener noreferrer">{{ skill.url }} <span aria-hidden="true">↗</span></a></div>
+                  <div class="career-actions"><button type="button" (click)="openSkillEdit(skill)">Edit</button><button class="danger-action" type="button" (click)="askDelete('skills', skill)">Delete</button></div>
+                </article>
+              }
+            </div>
+          } @else { <div class="career-empty"><span aria-hidden="true">✳</span><h4>No skills yet</h4><p>Add a skill to show it on your public portfolio.</p></div> }
+        }
+        @case ('experience') {
+          @if (experiences().length) {
+            <div class="admin-career-list">
+              @for (item of experiences(); track item.id) {
+                <article class="admin-career-card">
+                  <div class="career-card-content"><div class="career-card-title"><h4>{{ item.position }}</h4><span class="career-status" [class.is-current]="item.current">{{ item.current ? 'Current' : 'Completed' }}</span></div>
+                    <p class="career-subtitle">{{ item.company }} <span>·</span> {{ item.location }}</p><p class="career-period">{{ dateRange(item.startDate, item.endDate, item.current) }}</p>
+                    <p class="career-description">{{ item.description }}</p><a [href]="item.companyWebsite" target="_blank" rel="noopener noreferrer">Company website ↗</a></div>
+                  <div class="career-actions"><button type="button" (click)="openExperienceEdit(item)">Edit</button><button class="danger-action" type="button" (click)="askDelete('experience', item)">Delete</button></div>
+                </article>
+              }
+            </div>
+          } @else { <div class="career-empty"><span aria-hidden="true">↗</span><h4>No experience yet</h4><p>Add your professional experience to build your career timeline.</p></div> }
+        }
+        @case ('education') {
+          @if (education().length) {
+            <div class="admin-career-list">
+              @for (item of education(); track item.id) {
+                <article class="admin-career-card">
+                  <div class="career-card-content"><div class="career-card-title"><h4>{{ item.institution }}</h4><span class="career-status" [class.is-current]="item.current">{{ item.current ? 'Current' : 'Completed' }}</span></div>
+                    <p class="career-subtitle">{{ item.degree }} <span>·</span> {{ item.fieldOfStudy }}</p><p class="career-period">{{ dateRange(item.startDate, item.endDate, item.current) }}</p>
+                    <p class="career-description">{{ item.description }}</p><a [href]="item.institutionWebsite" target="_blank" rel="noopener noreferrer">Institution website ↗</a></div>
+                  <div class="career-actions"><button type="button" (click)="openEducationEdit(item)">Edit</button><button class="danger-action" type="button" (click)="askDelete('education', item)">Delete</button></div>
+                </article>
+              }
+            </div>
+          } @else { <div class="career-empty"><span aria-hidden="true">⌂</span><h4>No education yet</h4><p>Add your education and training to show your academic journey.</p></div> }
+        }
+      }
+    }
+  </section>
+
+  @if (editorOpen()) {
+    <div class="career-modal-backdrop" (click)="$event.target === $event.currentTarget && closeEditor()">
+      <section #careerDialog class="career-dialog" role="dialog" aria-modal="true" aria-labelledby="career-editor-title" (keydown)="trapDialogFocus($event, careerDialog)">
+        <button class="career-close" type="button" aria-label="Close dialog" [disabled]="saving()" (click)="closeEditor()">×</button>
+        <p class="career-eyebrow">{{ editingId() ? 'UPDATE CAREER ITEM' : 'NEW CAREER ITEM' }}</p>
+        <h3 id="career-editor-title">{{ editingId() ? 'Edit ' : 'Add ' }}{{ activeTab() === 'skills' ? 'skill' : activeTab() === 'experience' ? 'experience' : 'education' }}</h3>
+
+        @if (activeTab() === 'skills') {
+          <form [formGroup]="skillForm" (ngSubmit)="save()" (input)="clearValidationError()" (change)="clearValidationError()" novalidate>
+            @if (validationError()) { <p class="career-notice error" role="alert">{{ validationError() }}</p> }
+            <label>Name<input id="skill-name" formControlName="name" maxlength="180" autocomplete="off" required><small class="field-error">@if (skillForm.controls.name.touched && skillForm.controls.name.invalid) { Enter a name (maximum 180 characters). }</small></label>
+            <label>Category<input id="skill-category" formControlName="category" list="career-categories" maxlength="80" required><datalist id="career-categories"><option value="Frontend"><option value="Backend"><option value="Database"><option value="DevOps"><option value="Mobile"><option value="Tools"><option value="Programming Languages"><option value="Other"></datalist><small class="field-error">@if (skillForm.controls.category.touched && skillForm.controls.category.invalid) { Enter a category (maximum 80 characters). }</small></label>
+            <label>Level<select id="skill-level" formControlName="level" required><option value="" disabled>Select a level</option>@if (skillForm.controls.level.value && !['Beginner', 'Intermediate', 'Advanced', 'Expert'].includes(skillForm.controls.level.value)) { <option [value]="skillForm.controls.level.value">{{ skillForm.controls.level.value }}</option> }@for (level of ['Beginner', 'Intermediate', 'Advanced', 'Expert']; track level) { <option [value]="level">{{ level }}</option> }</select><small class="field-error">@if (skillForm.controls.level.touched && skillForm.controls.level.invalid) { Choose a level. }</small></label>
+            <label>Icon identifier<input id="skill-icon" formControlName="icon" maxlength="120" placeholder="e.g. spring" required><small class="field-hint">Technology identifier only; this is not an image URL.</small><small class="field-error">@if (skillForm.controls.icon.touched && skillForm.controls.icon.invalid) { Enter an icon identifier (maximum 120 characters). }</small></label>
+            <label>Website or documentation URL<input id="skill-url" formControlName="url" type="url" maxlength="2048" placeholder="https://example.com" required><small class="field-error">@if (skillForm.controls.url.touched && skillForm.controls.url.invalid) { Enter a valid HTTP(S) URL (maximum 2048 characters). }</small></label>
+            <div class="career-dialog-actions"><button class="career-secondary" type="button" [disabled]="saving()" (click)="closeEditor()">Cancel</button><button class="career-primary" type="submit" [disabled]="saving()" (click)="$event.preventDefault(); save()">{{ saving() ? 'Saving…' : editingId() ? 'Save changes' : 'Create skill' }}</button></div>
+          </form>
+        } @else if (activeTab() === 'experience') {
+          <form [formGroup]="experienceForm" (ngSubmit)="save()" (input)="clearValidationError()" (change)="clearValidationError()" novalidate>
+            @if (validationError()) { <p class="career-notice error" role="alert">{{ validationError() }}</p> }
+            <label>Position<input id="experience-position" formControlName="position" maxlength="180" required><small class="field-error">@if (experienceForm.controls.position.touched && experienceForm.controls.position.invalid) { Enter a position (maximum 180 characters). }</small></label>
+            <label>Company<input id="experience-company" formControlName="company" maxlength="180" required><small class="field-error">@if (experienceForm.controls.company.touched && experienceForm.controls.company.invalid) { Enter a company (maximum 180 characters). }</small></label>
+            <label>Location<input id="experience-location" formControlName="location" maxlength="180" required><small class="field-error">@if (experienceForm.controls.location.touched && experienceForm.controls.location.invalid) { Enter a location (maximum 180 characters). }</small></label>
+            <div class="career-date-grid"><label>Start date<input id="experience-start" formControlName="startDate" type="date" required><small class="field-error">@if (experienceForm.controls.startDate.touched && experienceForm.controls.startDate.invalid) { Start date is required. }</small></label><label>{{ experienceForm.controls.current.value ? 'Expected End Date' : 'End Date' }}<input id="experience-end" formControlName="endDate" type="date" required><small class="field-error">@if (experienceForm.controls.endDate.touched && experienceForm.controls.endDate.hasError('required')) { End date is required. } @else if (experienceForm.controls.endDate.touched && periodInvalid(experienceForm.controls.startDate.value, experienceForm.controls.endDate.value)) { End date must be on or after the start date. }</small></label></div>
+            <label class="career-check"><input type="checkbox" formControlName="current"><span>Currently working here</span></label>
+            <label>Description<textarea id="experience-description" formControlName="description" rows="4" required></textarea><small class="field-error">@if (experienceForm.controls.description.touched && experienceForm.controls.description.invalid) { Enter a description. }</small></label>
+            <label>Company website<input id="experience-website" formControlName="companyWebsite" type="url" maxlength="2048" placeholder="https://example.com" required><small class="field-error">@if (experienceForm.controls.companyWebsite.touched && experienceForm.controls.companyWebsite.invalid) { Enter a valid HTTP(S) URL. }</small></label>
+            @if (actionError()) { <p class="career-notice error" role="alert">{{ actionError() }}</p> }
+            <div class="career-dialog-actions"><button class="career-secondary" type="button" [disabled]="saving()" (click)="closeEditor()">Cancel</button><button class="career-primary" type="submit" [disabled]="saving()" (click)="$event.preventDefault(); save()">{{ saving() ? 'Saving…' : editingId() ? 'Save changes' : 'Create experience' }}</button></div>
+          </form>
+        } @else {
+          <form [formGroup]="educationForm" (ngSubmit)="save()" (input)="clearValidationError()" (change)="clearValidationError()" novalidate>
+            @if (validationError()) { <p class="career-notice error" role="alert">{{ validationError() }}</p> }
+            <label>Institution<input id="education-institution" formControlName="institution" maxlength="180" required><small class="field-error">@if (educationForm.controls.institution.touched && educationForm.controls.institution.invalid) { Enter an institution (maximum 180 characters). }</small></label>
+            <label>Degree<input id="education-degree" formControlName="degree" maxlength="180" required><small class="field-error">@if (educationForm.controls.degree.touched && educationForm.controls.degree.invalid) { Enter a degree (maximum 180 characters). }</small></label>
+            <label>Field of study<input id="education-field" formControlName="fieldOfStudy" maxlength="180" required><small class="field-error">@if (educationForm.controls.fieldOfStudy.touched && educationForm.controls.fieldOfStudy.invalid) { Enter a field of study (maximum 180 characters). }</small></label>
+            <div class="career-date-grid"><label>Start date<input id="education-start" formControlName="startDate" type="date" required><small class="field-error">@if (educationForm.controls.startDate.touched && educationForm.controls.startDate.invalid) { Start date is required. }</small></label><label>{{ educationForm.controls.current.value ? 'Expected End Date' : 'End Date' }}<input id="education-end" formControlName="endDate" type="date" required><small class="field-error">@if (educationForm.controls.endDate.touched && educationForm.controls.endDate.hasError('required')) { End date is required. } @else if (educationForm.controls.endDate.touched && periodInvalid(educationForm.controls.startDate.value, educationForm.controls.endDate.value)) { End date must be on or after the start date. }</small></label></div>
+            <label class="career-check"><input type="checkbox" formControlName="current"><span>Currently studying here</span></label>
+            <label>Description<textarea id="education-description" formControlName="description" rows="4" required></textarea><small class="field-error">@if (educationForm.controls.description.touched && educationForm.controls.description.invalid) { Enter a description. }</small></label>
+            <label>Institution website<input id="education-website" formControlName="institutionWebsite" type="url" maxlength="2048" placeholder="https://example.edu" required><small class="field-error">@if (educationForm.controls.institutionWebsite.touched && educationForm.controls.institutionWebsite.invalid) { Enter a valid HTTP(S) URL. }</small></label>
+            @if (actionError()) { <p class="career-notice error" role="alert">{{ actionError() }}</p> }
+            <div class="career-dialog-actions"><button class="career-secondary" type="button" [disabled]="saving()" (click)="closeEditor()">Cancel</button><button class="career-primary" type="submit" [disabled]="saving()" (click)="$event.preventDefault(); save()">{{ saving() ? 'Saving…' : editingId() ? 'Save changes' : 'Create education' }}</button></div>
+          </form>
+        }
+        @if (actionError() && activeTab() === 'skills') { <p class="career-notice error" role="alert">{{ actionError() }}</p> }
+      </section>
+    </div>
+  }
+
+  @if (deleteTarget(); as target) {
+    <div class="career-modal-backdrop" (click)="$event.target === $event.currentTarget && cancelDelete()">
+      <section #deleteDialog class="career-dialog confirm-career-delete" role="alertdialog" aria-modal="true" aria-labelledby="career-delete-title" (keydown)="trapDialogFocus($event, deleteDialog)">
+        <span class="delete-symbol" aria-hidden="true">!</span><p class="career-eyebrow">CONFIRM REMOVAL</p><h3 id="career-delete-title">Delete this item?</h3>
+        <p><strong>{{ target.name }}</strong> will be removed from the public career page.</p>
+        @if (actionError()) { <p class="career-notice error" role="alert">{{ actionError() }}</p> }
+        <div class="career-dialog-actions"><button class="career-secondary" type="button" [disabled]="deleting()" (click)="cancelDelete()">Cancel</button><button class="career-danger" type="button" [disabled]="deleting()" (click)="confirmDelete()">{{ deleting() ? 'Deleting…' : 'Confirm Delete' }}</button></div>
+      </section>
+    </div>
+  }
+</section>

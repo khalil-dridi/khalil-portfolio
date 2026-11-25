@@ -13,13 +13,13 @@ export const ADMIN_ROUTES: Routes = [
     canActivate: [authGuard],
     canActivateChild: [authGuard],
     children: [
-      { path: '', pathMatch: 'full', loadComponent: () => import('./dashboard/dashboard').then((module) => module.Dashboard) },
+      { path: '', pathMatch: 'full', redirectTo: 'career' },
       { path: 'profile', loadComponent: () => import('./profile/profile').then((module) => module.Profile) },
       { path: 'projects', loadComponent: () => import('./projects/projects').then((module) => module.AdminProjects) },
-      { path: 'skills', loadComponent: () => import('./skills/skills').then((module) => module.AdminSkills) },
-      { path: 'experiences', loadComponent: () => import('./experiences/experiences').then((module) => module.Experiences) },
-      { path: 'education', loadComponent: () => import('./education/education').then((module) => module.Education) },
-      { path: 'messages', loadComponent: () => import('./messages/messages').then((module) => module.Messages) },
+      { path: 'career', loadComponent: () => import('./career/career').then((module) => module.AdminCareer) },
+      { path: 'skills', pathMatch: 'full', redirectTo: 'career' },
+      { path: 'experiences', pathMatch: 'full', redirectTo: 'career' },
+      { path: 'education', pathMatch: 'full', redirectTo: 'career' },
     ],
   },
 ];
